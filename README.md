@@ -1,6 +1,7 @@
 # Vue Storefront Adyen Payment Module
 
 Use at Your own risk.
+
 ###Features:
 - [x] Adyen CreditCard payment
 - [x] Adyen field validation and encryption.
