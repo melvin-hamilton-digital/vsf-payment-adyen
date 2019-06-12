@@ -29,7 +29,7 @@
 </style>
 <script>
 import {mapGetters} from 'vuex'
-import store from '@vue-storefront/store'
+import store from '@vue-storefront/core/store'
 
 export default {
   name: 'CardForm',
