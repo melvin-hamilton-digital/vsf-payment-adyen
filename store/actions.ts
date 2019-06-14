@@ -45,7 +45,7 @@ export const actions: ActionTree<AdyenState, any> = {
     const adyenCollection = Vue.prototype.$db.adyenCollection
     const merchantReference = adyenCollection.getItem('merchantReference',(err, result) => {
       if (!err) {
-        axios.get(rootStore.state.config.adyen.sprykerConfirm, {
+        axios.get(rootStore.state.config.adyen.paypalResultHandler, {
           params: {
             payload: route.query.payload,
             resultCode: route.query.resultCode,
