@@ -27,6 +27,7 @@ Add API Key and paypal endpoint to hendle PayPal result from adyen.
   "originKey": "origin_key",
   "paypalResultHandler": "https://your-backend/adyen-end-points/paypal"
 }
+```
 
 set Driver for adyen
 
