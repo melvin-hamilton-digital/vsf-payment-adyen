@@ -1,13 +1,13 @@
 // This function will be fired both on server and client side context after registering other parts of the module
-export function afterRegistration({ Vue, store, isServer }){
+export function afterRegistration({ Vue, store, isServer }) {
     let correctPaymentMethod = false
     const placeOrder = function () {
         if (correctPaymentMethod) {
             Vue.prototype.$bus.$emit('checkout-do-placeOrder', {
-                encrypted_card_number: store.state.adyen.encrypted_card_number,
-                encrypted_expiry_month: store.state.adyen.encrypted_expiry_month,
-                encrypted_expiry_year: store.state.adyen.encrypted_expiry_year,
-                encrypted_security_code: store.state.adyen.encrypted_security_code
+                encrypted_card_number: store.state.adyen.adyenCard.encrypted_card_number,
+                encrypted_expiry_month: store.state.adyen.adyenCard.encrypted_expiry_month,
+                encrypted_expiry_year: store.state.adyen.adyenCard.encrypted_expiry_year,
+                encrypted_security_code: store.state.adyen.adyenCard.encrypted_security_code
             })
         }
     }

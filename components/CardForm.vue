@@ -94,7 +94,7 @@ export default {
             this.createForm()
           }
         ).catch(e => {
-          console.info(e, 'e')
+          console.info(e, 'adyen error')
         })
       }
     } else {
@@ -113,9 +113,6 @@ export default {
       })
     },
     createForm () {
-      if (!this.payment.paymentMethodAdditional) {
-        this.payment.paymentMethodAdditional = {}
-      }
       if (Object.keys(this.payment.paymentMethodAdditional).length) {
         this.payment.paymentMethodAdditional = {}
       }
