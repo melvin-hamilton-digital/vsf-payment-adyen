@@ -113,7 +113,7 @@ export default {
       })
     },
     createForm () {
-      if (this.payment.paymentMethodAdditional) {
+      if (Object.keys(this.payment.paymentMethodAdditional).length) {
         this.payment.paymentMethodAdditional = {}
       }
       this.securedFields = window.csf(this.csfSetupObj)
