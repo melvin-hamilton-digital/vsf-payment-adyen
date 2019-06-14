@@ -1,5 +1,5 @@
 // This function will be fired both on server and client side context after registering other parts of the module
-export function afterRegistration({ Vue, store }){
+export function afterRegistration({ Vue, store, isServer }){
     let correctPaymentMethod = false
     const placeOrder = function () {
         if (correctPaymentMethod) {
@@ -11,7 +11,7 @@ export function afterRegistration({ Vue, store }){
             })
         }
     }
-    if (!Vue.prototype.$isServer) {
+    if (!isServer) {
         Vue.prototype.$bus.$on('checkout-before-placeOrder', placeOrder)
         console.info('This will be called after extension registration and only on client side')
 
