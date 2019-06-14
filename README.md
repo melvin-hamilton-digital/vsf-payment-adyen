@@ -45,11 +45,13 @@ Under your theme `components/core/blocks/Checkout/Payment.vue`.
 
 ```js
 import CardForm from 'src/modules/adyen/components/CardForm'
+import PayPal from 'src/modules/adyen/components/PayPal'
 
 export default {
   components: {
     ...
-    CardForm
+    CardForm,
+    PayPal
   },
   ...
   computed: {

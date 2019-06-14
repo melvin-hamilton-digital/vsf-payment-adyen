@@ -29,7 +29,7 @@
 </style>
 <script>
 import {mapGetters} from 'vuex'
-import store from '@vue-storefront/store'
+import store from '@vue-storefront/core/store'
 
 export default {
   name: 'CardForm',
@@ -94,7 +94,7 @@ export default {
             this.createForm()
           }
         ).catch(e => {
-          console.info(e, 'e')
+          console.info(e, 'adyen error')
         })
       }
     } else {
@@ -113,7 +113,7 @@ export default {
       })
     },
     createForm () {
-      if (Object.keys(this.payment.paymentMethodAdditional).length) {
+      if (this.payment.paymentMethodAdditional) {
         this.payment.paymentMethodAdditional = {}
       }
       this.securedFields = window.csf(this.csfSetupObj)

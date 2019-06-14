@@ -9,5 +9,11 @@ export const mutations: MutationTree<any> = {
   [types.REMOVE_CARD_DATA] (state) {
     state.adyenCard = {}
     state.isAdyenValid = false
+  },
+  [types.VALID] (state) {
+    state.isAdyenValid = true
+  },
+  [types.INVALID] (state) {
+    state.isAdyenValid = false
   }
 }
