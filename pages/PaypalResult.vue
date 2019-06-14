@@ -1,27 +1,5 @@
 <template>
   <div>
-    <div v-if="order">
-      <div class="nosto_page_type" style="display:none">order</div>
-      <div class="nosto_purchase_order" style="display:none">
-        <span class="order_number">{{ order.order_id }}</span>
-        <div class="buyer">
-          <span class="email">{{ order.addressInformation.billingAddress.email }}</span>
-          <span class="first_name">{{ order.addressInformation.billingAddress.firstname }}</span>
-          <span class="last_name">{{ order.addressInformation.billingAddress.lastname }}</span>
-          <span class="marketing_permission">false</span>
-        </div>
-        <div class="purchased_items" v-if="order.products">
-          <div class="line_item" v-for="product in order.products" :key="product.sku">
-            <span class="product_id">{{ product.sku }}</span>
-            <span class="quantity">{{ product.qty }}</span>
-            <span class="name">{{ product.name }}</span>
-            <!--TODO: caution! this product.price can be changed after unification all data import-->
-            <span class="unit_price">{{ parseFloat(product.price / 100).toFixed(2) }}</span>
-            <span class="price_currency_code">EUR</span>
-          </div>
-        </div>
-      </div>
-    </div>
     <header class="thank-you-title py35 pl20">
       <div class="container">
         <breadcrumbs
