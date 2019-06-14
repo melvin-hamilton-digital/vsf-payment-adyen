@@ -29,7 +29,7 @@
 </style>
 <script>
 import {mapGetters} from 'vuex'
-import store from '@vue-storefront/store'
+import store from '@vue-storefront/core/store'
 
 export default {
   name: 'CardForm',
@@ -113,6 +113,9 @@ export default {
       })
     },
     createForm () {
+      if (!this.payment.paymentMethodAdditional) {
+        this.payment.paymentMethodAdditional = {}
+      }
       if (Object.keys(this.payment.paymentMethodAdditional).length) {
         this.payment.paymentMethodAdditional = {}
       }
