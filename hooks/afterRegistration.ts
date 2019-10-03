@@ -13,7 +13,6 @@ export function afterRegistration({ Vue, store, isServer }) {
     }
     if (!isServer) {
         Vue.prototype.$bus.$on('checkout-before-placeOrder', placeOrder)
-        console.info('This will be called after extension registration and only on client side')
 
         Vue.prototype.$bus.$on('checkout-payment-method-changed', (paymentMethodCode) => {
             let methods = store.state['payment-backend-methods'].methods

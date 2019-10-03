@@ -3,7 +3,7 @@ import { module } from './store'
 import { afterRegistration } from './hooks/afterRegistration'
 import { beforeRegistration } from './hooks/beforeRegistration'
 
-export const KEY = 'adyen'
+export const KEY = 'payment-adyen'
 
 const moduleConfig: VueStorefrontModuleConfig = {
     key: KEY,
@@ -12,4 +12,4 @@ const moduleConfig: VueStorefrontModuleConfig = {
     afterRegistration
 }
 
-export const Adyen = createModule(moduleConfig)
+export const PaymentAdyen = createModule(moduleConfig)

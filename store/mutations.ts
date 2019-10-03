@@ -15,5 +15,9 @@ export const mutations: MutationTree<any> = {
   },
   [types.INVALID] (state) {
     state.isAdyenValid = false
+  },
+  [types.SET_PAYMENT_METHODS] (state, result) {
+    state.paymentMethods = result
+    console.log(state.paymentMethods)
   }
 }
