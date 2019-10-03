@@ -18,6 +18,5 @@ export const mutations: MutationTree<any> = {
   },
   [types.SET_PAYMENT_METHODS] (state, result) {
     state.paymentMethods = result
-    console.log(state.paymentMethods)
   }
 }
