@@ -1,6 +1,27 @@
-// This object should represent structure of your modules Vuex state
-// It's a good practice is to name this interface accordingly to the KET (for example mailchimpState)
+interface PaymentDetail {
+    key: string,
+    type: string,
+    optional?: Boolean
+}
+
+interface PaymentIcon {
+    url: string,
+    width: Number,
+    height: Number
+}
+
+interface PaymentMethod {
+    type: string,
+    title: string,
+    isPaymentMethodOpenInvoiceMethod: Boolean,
+    icon: PaymentIcon | null,
+    supportRecurring?: Boolean,
+    details?: Array<PaymentDetail>,
+    brands?: Array<string>
+}
+
 export interface AdyenState {
     isAdyenValid: boolean | null,
-    adyenCard: any | null
+    adyenCard: any | null,
+    paymentMethods: Array<PaymentMethod>
 }
