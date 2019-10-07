@@ -87,8 +87,14 @@ export default {
             name: 'Credit or debit card'
           }
         },
-        onSubmit: (state, dropin) => {
+        onSubmit: async (state, dropin) => {
           console.log('submit', state, dropin)
+          await this.$store.dispatch('payment-adyen/initPayment', {
+            method: 'adyen_cc',
+            additional_data: {
+              ...state.data.paymentMethod
+            }
+          })
           // state.data.paymentMethod.
           /**
            * encryptedCardNumber: "adyenjs_0_1_25$eR105CjTL5M45HOv9aCC5IDjSVwhk5Ke4C5yoZ/TOYzsK7qkwzAjGl5CqevnYWDvtWsiHcxnMLS1ugNLN92y2LiFEmgDcwgtrsw6R7RdlSFvchIPmGzFmcC2nUfCHBFBOfVA8Naz5Z/p73M/6wVG6raLVPq10I0BeDax6LIkEkdceUxO1YCkjDuIOY7tL5JpyHp8OfYcLuzyvGFQeaDInkFl2qc7aDX/B9Y0NymhDyjXV5YlJNvRaTprL/lkopAvFPOgOM9DNj6jBmQ54/MWVt8jiLfZBr9nMR5aGozRMmVLBvFAXIAx0DfE2/29NfcxK86meyto2dbvLJ5y88wE1w==$vRcfhq5A1y0VHMZaEWtPK5iuih3u15ereI9tkCshO91VrHNc1XGLGgfKzo24xdXsReW+hbu2OF5jPGnlLkqW2+2LIiiDU/iDJPuwCKrtQWDakFpS8x58usQ32eNWG1mfG9oy+gBB/849mC4zk4dpblzOAxWafJ+zR7LCT4s0FkRhaPaKF5eOrR8DmWxtlt3KLmlrIBY8Rh7IH35nPuTTO1nNoyKegzX+P7HZFjHM9HPJZ7++2rPIY9Z/DFQER9w8RMnt996k0dDqpEZcMGIZ9j6m4Gddbt+St+1QdZhxWxOvoxcFyGelIAAoll9/bySFCB8kKBy24bLYFJk/V24dKuwECm/wLFcDaKsr4YeKds4jU0C6iIgn7ApLcRdyG0AoleNtcdyZZuxLEKzr4iHYxPqf4NzAFAWTsbUC5NHBT4x5fKNnYxAUHKXSb+YhTTaRMyhjz0UZkUC6CTeON16Zwz94+0Rt3n3RKUOuiCL15QVEULKwj4TLs08KUMsGATD9OwxfjaHwTZGgLm3Yn3aBKsCAFWj8EX1NGsE8O2Ax6eZak6g3e44eyfoKvqZhITM0dtCRoM7msqV7Q0qN4ssRbiIVxN6F6ADe/OkJrzzOQROBBPo4XWfQyxc0OqqdL06DPqLqM8TyYZcPA7SZjHtA5HKnP4t2/PnJIYuzYO+On/HpmN4L9kFkJ4+MHuffU1vJihK6YQ4FRrUCzm2E/6KEq7heG3m/ibO4D3k4C9Or4Z6VyuKeiTSHyMaCrHYZp9iXBqH4lJ2Di9IJhhffgGeCILX/uevcAUVO5EKOm3ZU83sBDz2pgEqy0q+DyimdSOv6PtqEn1VftZFFeEkRk4rfeiAo0XA1O/xRfTcKS97geyMcgTL0aTKIPPEFWfk1RPeAbA6f3tZZAofAh8xecJ1D+uGIo4UBTiMLt8Zn+E8CYQRFH17PBk0vVTUDTwsixvzpBSlwgQ1GqNSJf3EmwcN6AT/ZktRo5LUrwyCBJ1/FXub9R+T99F+z9WTw0NAHzMv9LLEs7lFZhk4rCxpboXSavj3ULI+x3EEuUeAkZ+PNgTEQLZq50CRQ9U2Kb40B574h7L23xgGm0X/z739QRg=="

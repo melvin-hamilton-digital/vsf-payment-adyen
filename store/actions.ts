@@ -97,5 +97,26 @@ export const actions: ActionTree<AdyenState, any> = {
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
+  },
+
+  async initPayment ({ commit }, { method, additional_data }) {
+    try {
+      const { storeCode } = currentStoreView()
+      let response = await fetch(`${config.api.magento}${storeCode}/rest/V1/adyen/payment`, {
+        method: 'POST',
+        body: JSON.stringify({
+          payment: JSON.stringify({
+            method,
+            additional_data
+          })
+        })
+      })
+      let { result } = await response.json()
+
+      console.log(result)
+      debugger
+    } catch (err) {
+      console.error('[Adyen Payments]', err)
+    }
   }
 }
