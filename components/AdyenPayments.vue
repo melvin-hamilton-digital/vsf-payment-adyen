@@ -10,7 +10,7 @@ import {mapGetters} from 'vuex'
 import store from '@vue-storefront/core/store'
 
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-import collectBrowserInfo from "../adyen-3ds2-js-utils/browser";
+import collectBrowserInfo from "../adyen-utils/browser";
 // import base64Url from "./adyen-3ds2-js-utils/base64url";
 // import createIframe from "./adyen-3ds2-js-utils/iframe";
 // import createForm from "./adyen-3ds2-js-utils/form";
@@ -102,6 +102,8 @@ export default {
         onSubmit: async (state, dropin) => {
           try {
             const storeView = currentStoreView()
+
+            console.log(state, dropin)
 
             let result = await this.$store.dispatch('payment-adyen/initPayment', {
               method: 'adyen_cc',
