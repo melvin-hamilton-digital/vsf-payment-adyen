@@ -64,10 +64,16 @@ export default {
         this.payment.paymentMethodAdditional = {}
       }
 
+      const originKeys = this.$store.state.config.adyen.originKeys
+      const origin = window.location.origin
+      if (!originKeys[origin]) {
+        console.error('[Adyen] Set origin key in the config!')
+      }
+
       const configuration = {
         locale: "en-US",
         environment: "test",
-        originKey: 'pub.v2.8015353771050242.aHR0cDovL2xvY2FsaG9zdDozMDAw.ARYOUI-hdgSz6sj3ae2VrXeHajq0lfpTRA_bEb8gqRE',
+        originKey: originKeys[origin],
         paymentMethodsResponse: {
           // There I am setting payment methods
           // For now only scheme === adyen_cc
