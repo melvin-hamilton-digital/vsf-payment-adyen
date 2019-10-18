@@ -1,12 +1,20 @@
 <template>
   <div class="adyen-block">
     <div id="adyen-payments-dropin"></div>
+    <div id="threeDS2Container"></div>
   </div>
 </template>
 
 <script>
 import {mapGetters} from 'vuex'
 import store from '@vue-storefront/core/store'
+
+import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import collectBrowserInfo from "../adyen-3ds2-js-utils/browser";
+// import base64Url from "./adyen-3ds2-js-utils/base64url";
+// import createIframe from "./adyen-3ds2-js-utils/iframe";
+// import createForm from "./adyen-3ds2-js-utils/form";
+// import {validateChallengeWindowSize, getChallengeWindowSize} from "./adyen-3ds2-js-utils/config.js";
 
 export default {
 
@@ -15,6 +23,9 @@ export default {
   data () {
     return {
       payment: this.$store.state.checkout.paymentDetails,
+      tst: this.$store.getters['payment-adyen/methods'],
+      adyenCheckoutInstance: null,
+      threeDS2IdentifyComponent: null
     }
   },
 
@@ -58,28 +69,29 @@ export default {
         environment: "test",
         originKey: 'pub.v2.8015353771050242.aHR0cDovL2xvY2FsaG9zdDozMDAw.ARYOUI-hdgSz6sj3ae2VrXeHajq0lfpTRA_bEb8gqRE',
         paymentMethodsResponse: {
-          paymentMethods: this.$store.getters['payment-adyen/methods']
+          // There I am setting payment methods
+          // For now only scheme === adyen_cc
+          paymentMethods: this.$store.getters['payment-adyen/methods'].filter(method => method.type === 'scheme')
         }
       };
+      this.adyenCheckoutInstance = new AdyenCheckout(configuration);
 
-      const checkout = new AdyenCheckout(configuration);
-
-      const dropin = checkout
+      const dropin = this.adyenCheckoutInstance
       .create('dropin', {
         paymentMethodsConfiguration: {
-          applepay: { // Example required configuration for Apple Pay
-            configuration: {
-              merchantName: 'Adyen Test merchant', // Name to be displayed on the form
-              merchantIdentifier: 'adyen.test.merchant' // Your Apple merchant identifier as described in https://developer.apple.com/documentation/apple_pay_on_the_web/applepayrequest/2951611-merchantidentifier
-            }
-          },
-          paywithgoogle: { // Example required configuration for Google Pay
-            environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
-            configuration: {
-            gatewayMerchantId: "YourCompanyOrMerchantAccount", // Your Adyen merchant or company account name
-            merchantIdentifier: "12345678910111213141" // Your Google Merchant ID as described in https://developers.google.com/pay/api/web/guides/test-and-deploy/deploy-production-environment#obtain-your-merchantID
-            }
-          },
+          // applepay: { // Example required configuration for Apple Pay
+          //   configuration: {
+          //     merchantName: 'Adyen Test merchant', // Name to be displayed on the form
+          //     merchantIdentifier: 'adyen.test.merchant' // Your Apple merchant identifier as described in https://developer.apple.com/documentation/apple_pay_on_the_web/applepayrequest/2951611-merchantidentifier
+          //   }
+          // },
+          // paywithgoogle: { // Example required configuration for Google Pay
+          //   environment: "TEST", // Change this to PRODUCTION when you're ready to accept live Google Pay payments
+          //   configuration: {
+          //   gatewayMerchantId: "YourCompanyOrMerchantAccount", // Your Adyen merchant or company account name
+          //   merchantIdentifier: "12345678910111213141" // Your Google Merchant ID as described in https://developers.google.com/pay/api/web/guides/test-and-deploy/deploy-production-environment#obtain-your-merchantID
+          //   }
+          // },
           card: { // Example optional configuration for Cards
             hasHolderName: true,
             holderNameRequired: true,
@@ -88,13 +100,37 @@ export default {
           }
         },
         onSubmit: async (state, dropin) => {
-          console.log('submit', state, dropin)
-          await this.$store.dispatch('payment-adyen/initPayment', {
-            method: 'adyen_cc',
-            additional_data: {
-              ...state.data.paymentMethod
+          try {
+            const storeView = currentStoreView()
+
+            let result = await this.$store.dispatch('payment-adyen/initPayment', {
+              method: 'adyen_cc',
+              additional_data: {
+                ...state.data.paymentMethod
+              },
+              browserInfo: {
+                ...collectBrowserInfo(),
+                language: storeView.i18n.defaultLocale
+              }
+            })
+
+            if(result.threeDS2) {
+              alert('We currently does not support 3d card payment')
+            } else {
+              this.$emit('payed', {
+                method: 'adyen_cc',
+                additional_data: {
+                  ...state.data.paymentMethod
+                },
+                browserInfo: {
+                  ...collectBrowserInfo(),
+                  language: storeView.i18n.defaultLocale
+                }
+              })
             }
-          })
+          } catch (err) {
+            console.error(err)
+          }
           // state.data.paymentMethod.
           /**
            * encryptedCardNumber: "adyenjs_0_1_25$eR105CjTL5M45HOv9aCC5IDjSVwhk5Ke4C5yoZ/TOYzsK7qkwzAjGl5CqevnYWDvtWsiHcxnMLS1ugNLN92y2LiFEmgDcwgtrsw6R7RdlSFvchIPmGzFmcC2nUfCHBFBOfVA8Naz5Z/p73M/6wVG6raLVPq10I0BeDax6LIkEkdceUxO1YCkjDuIOY7tL5JpyHp8OfYcLuzyvGFQeaDInkFl2qc7aDX/B9Y0NymhDyjXV5YlJNvRaTprL/lkopAvFPOgOM9DNj6jBmQ54/MWVt8jiLfZBr9nMR5aGozRMmVLBvFAXIAx0DfE2/29NfcxK86meyto2dbvLJ5y88wE1w==$vRcfhq5A1y0VHMZaEWtPK5iuih3u15ereI9tkCshO91VrHNc1XGLGgfKzo24xdXsReW+hbu2OF5jPGnlLkqW2+2LIiiDU/iDJPuwCKrtQWDakFpS8x58usQ32eNWG1mfG9oy+gBB/849mC4zk4dpblzOAxWafJ+zR7LCT4s0FkRhaPaKF5eOrR8DmWxtlt3KLmlrIBY8Rh7IH35nPuTTO1nNoyKegzX+P7HZFjHM9HPJZ7++2rPIY9Z/DFQER9w8RMnt996k0dDqpEZcMGIZ9j6m4Gddbt+St+1QdZhxWxOvoxcFyGelIAAoll9/bySFCB8kKBy24bLYFJk/V24dKuwECm/wLFcDaKsr4YeKds4jU0C6iIgn7ApLcRdyG0AoleNtcdyZZuxLEKzr4iHYxPqf4NzAFAWTsbUC5NHBT4x5fKNnYxAUHKXSb+YhTTaRMyhjz0UZkUC6CTeON16Zwz94+0Rt3n3RKUOuiCL15QVEULKwj4TLs08KUMsGATD9OwxfjaHwTZGgLm3Yn3aBKsCAFWj8EX1NGsE8O2Ax6eZak6g3e44eyfoKvqZhITM0dtCRoM7msqV7Q0qN4ssRbiIVxN6F6ADe/OkJrzzOQROBBPo4XWfQyxc0OqqdL06DPqLqM8TyYZcPA7SZjHtA5HKnP4t2/PnJIYuzYO+On/HpmN4L9kFkJ4+MHuffU1vJihK6YQ4FRrUCzm2E/6KEq7heG3m/ibO4D3k4C9Or4Z6VyuKeiTSHyMaCrHYZp9iXBqH4lJ2Di9IJhhffgGeCILX/uevcAUVO5EKOm3ZU83sBDz2pgEqy0q+DyimdSOv6PtqEn1VftZFFeEkRk4rfeiAo0XA1O/xRfTcKS97geyMcgTL0aTKIPPEFWfk1RPeAbA6f3tZZAofAh8xecJ1D+uGIo4UBTiMLt8Zn+E8CYQRFH17PBk0vVTUDTwsixvzpBSlwgQ1GqNSJf3EmwcN6AT/ZktRo5LUrwyCBJ1/FXub9R+T99F+z9WTw0NAHzMv9LLEs7lFZhk4rCxpboXSavj3ULI+x3EEuUeAkZ+PNgTEQLZq50CRQ9U2Kb40B574h7L23xgGm0X/z739QRg=="
@@ -108,12 +144,133 @@ export default {
         },
         onAdditionalDetails: (state, dropin) => {
           console.log('additionlDetails', state, dropin)
-         
         }
       })
       .mount('#adyen-payments-dropin');
+
+      // this.renderThreeDS2Component('IdentifyShopper', 'TOKEN')
       
-    }
+    },
+
+    // placeOrder ({ method, brwoserInfo, additional_data }) {
+    //   // method: 'adyen_cc',
+    //   //         additional_data: {
+    //   //           ...state.data.paymentMethod
+    //   //         },
+    //   //         browserInfo: {
+    //   //           ...collectBrowserInfo(),
+    //   //           language: storeView.i18n.defaultLocale
+    //   //         }
+
+    // },
+
+    renderThreeDS2Component (type, token) {
+      const threeDS2Node = document.getElementById('threeDS2Container');
+
+      if (type == "IdentifyShopper") {
+        this.threeDS2IdentifyComponent = this.adyenCheckoutInstance
+          .create('threeDS2DeviceFingerprint', {
+            fingerprintToken: token,
+            onComplete (result) {
+              console.log(result,' XX')
+//               data:
+              // details:
+              // threeds2.fingerprint: "eyJ0aHJlZURTQ29tcEluZCI6IlUifQ=="
+              // __proto__: Object
+              // paymentData: ""
+              // It sends request to /adyen/threeDS2Process
+              // threeds2.processThreeDS2(result.data).done(function (responseJSON) {
+              //   this.validateThreeDS2OrPlaceOrder(responseJSON)
+              // }).error(function () {
+              //   this.isPlaceOrderActionAllowed(true);
+              //   fullScreenLoader.stopLoader();
+              // });
+            },
+            onError: function (error) {
+              console.log(JSON.stringify(error));
+            }
+        });
+        console.log('here')
+        this.threeDS2IdentifyComponent.mount(threeDS2Node);
+
+
+      } else if (type == "ChallengeShopper") {
+        // fullScreenLoader.stopLoader();
+
+        // var popupModal = $('#threeDS2Modal').modal({
+        //   // disable user to hide popup
+        //   clickableOverlay: false,
+        //   // empty buttons, we don't need that
+        //   buttons: [],
+        //   modalClass: 'threeDS2Modal'
+        // });
+
+        // popupModal.modal("openModal");
+
+        this.threeDS2ChallengeComponent = this.adyenCheckoutInstance
+          .create('threeDS2Challenge', {
+            challengeToken: token,
+            size: '05',
+            onComplete (result) {
+              this.closeModal(popupModal);
+
+              // fullScreenLoader.startLoader();
+              // threeds2.processThreeDS2(result.data).done(function (responseJSON) {
+              //   this.validateThreeDS2OrPlaceOrder(responseJSON);
+              // }).error(function () {
+              //   this.isPlaceOrderActionAllowed(true);
+              //   fullScreenLoader.stopLoader();
+              // });
+            },
+            onError (error) {
+              this.closeModal(popupModal);
+              console.log(JSON.stringify(error));
+            }
+          });
+
+        this.threeDS2ChallengeComponent.mount(threeDS2Node);
+      }
+    },
+
+    closeModal (popupModal) {
+                popupModal.modal("closeModal");
+                $('.threeDS2Modal').remove();
+                $('.modals-overlay').remove();
+
+                // reconstruct the threeDS2Modal container again otherwise component can not find the threeDS2Modal
+                $('#threeDS2Wrapper').append("<div id=\"threeDS2Modal\">" +
+                    "<div id=\"threeDS2Container\"></div>" +
+                    "</div>");
+            },
+
+     validateThreeDS2OrPlaceOrder: function (responseJSON) {
+
+                var response = JSON.parse(responseJSON);
+
+                if (!!response.threeDS2) {
+                    // render component
+                    this.renderThreeDS2Component(response.type, response.token);
+                } else {
+                    this.getPlaceOrderDeferredObject()
+                        .fail(
+                            function () {
+                                fullScreenLoader.stopLoader();
+                                this.isPlaceOrderActionAllowed(true);
+                            }
+                        ).done(
+                        function () {
+                            this.afterPlaceOrder();
+
+                            if (this.redirectAfterPlaceOrder) {
+                                // use custom redirect Link for supporting 3D secure
+                                window.location.replace(url.build(
+                                    window.checkoutConfig.payment[quote.paymentMethod().method].redirectUrl)
+                                );
+                            }
+                        }
+                    );
+                }
+            }
 
   }
 }

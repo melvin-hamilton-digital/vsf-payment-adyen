@@ -9,7 +9,7 @@ import fetch from 'isomorphic-fetch'
 import config from 'config'
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
 
-const baseUrl = `${config.api.url}ext/payment-adyen/methods/`
+const baseUrl = `${config.api.url}ext/payment-adyen/`
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<AdyenState, any> = {
@@ -83,7 +83,7 @@ export const actions: ActionTree<AdyenState, any> = {
   async loadPaymentMethods ({ commit }, { cartId, country }) {
     try {
       const { storeCode } = currentStoreView()
-      let response = await fetch(`${baseUrl}${storeCode}/${cartId}`, {
+      let response = await fetch(`${baseUrl}methods/${storeCode}/${cartId}`, {
         method: 'POST',
         body: JSON.stringify({
           shippingAddress: {
@@ -99,22 +99,36 @@ export const actions: ActionTree<AdyenState, any> = {
     }
   },
 
-  async initPayment ({ commit }, { method, additional_data }) {
+  async initPayment ({ commit, rootGetters }, { method, additional_data, browserInfo }) {
+    const cartId = rootGetters['cart/getCartToken']
+    if (!cartId) {
+      console.error('[Adyen] CartId does not exist')
+      return
+    }
     try {
       const { storeCode } = currentStoreView()
-      let response = await fetch(`${config.api.magento}${storeCode}/rest/V1/adyen/payment`, {
+      let response = await fetch(`${baseUrl}payment/start/${storeCode}/${cartId}`, {
         method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
         body: JSON.stringify({
-          payment: JSON.stringify({
-            method,
-            additional_data
-          })
+          method,
+          additional_data: {
+            number: additional_data.encryptedCardNumber,
+            expiryMonth: additional_data.encryptedExpiryMonth,
+            cvc: additional_data.encryptedSecurityCode,
+            expiryYear: additional_data.encryptedExpiryYear,
+            holderName: additional_data,
+            ...browserInfo
+          }
         })
       })
+
       let { result } = await response.json()
 
-      console.log(result)
-      debugger
+      return result
+      
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
