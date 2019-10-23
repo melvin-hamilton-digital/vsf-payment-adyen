@@ -129,7 +129,7 @@ export const actions: ActionTree<AdyenState, any> = {
             expiryMonth: additional_data.encryptedExpiryMonth,
             cvc: additional_data.encryptedSecurityCode,
             expiryYear: additional_data.encryptedExpiryYear,
-            holderName: additional_data,
+            holderName: additional_data.holderName,
             ...browserInfo
           }
         })

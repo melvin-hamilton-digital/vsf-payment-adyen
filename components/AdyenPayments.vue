@@ -103,16 +103,17 @@ export default {
             holderNameRequired: true,
             enableStoreDetails: true,
             name: 'Credit or debit card'
+          },
+          paypal: {
+            name: 'PayPal'
           }
         },
         onSubmit: async (state, dropin) => {
           try {
             const storeView = currentStoreView()
 
-            console.log(state, dropin)
-
             let result = await this.$store.dispatch('payment-adyen/initPayment', {
-              method: 'adyen_cc',
+              method: state.data.paymentMethod.type,
               additional_data: {
                 ...state.data.paymentMethod
               },
