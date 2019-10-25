@@ -60,7 +60,7 @@ export default {
     },
 
     createForm () {
-      if (Object.keys(this.payment.paymentMethodAdditional).length) {
+      if (this.payment.paymentMethodAdditional && Object.keys(this.payment.paymentMethodAdditional).length) {
         this.payment.paymentMethodAdditional = {}
       }
 
@@ -78,7 +78,15 @@ export default {
           // There I am setting payment methods
           // For now only scheme === adyen_cc
           paymentMethods: this.$store.getters['payment-adyen/methods'].filter(method => method.type === 'scheme')
-        }
+        }//,
+        // onChange(a,b) {
+        //   console.log(a,b)
+        //   alert('heh')
+        // },
+        // onAdditionalDetails(a,b) {
+        //   console.log(a,b)
+        //   alert('heh2')
+        // }
       };
       this.adyenCheckoutInstance = new AdyenCheckout(configuration);
 
@@ -105,6 +113,7 @@ export default {
             name: 'Credit or debit card'
           },
           paypal: {
+            enableStoreDetails: true,
             name: 'PayPal'
           }
         },
@@ -127,7 +136,7 @@ export default {
               alert('We currently does not support 3d card payment')
             } else {
               this.$emit('payed', {
-                method: 'adyen_cc',
+                method: state.data.paymentMethod.type,
                 additional_data: {
                   ...state.data.paymentMethod
                 },
