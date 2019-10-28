@@ -97,8 +97,7 @@ export const actions: ActionTree<AdyenState, any> = {
         })
       })
       let { result } = await response.json()
-
-      commit(types.SET_PAYMENT_METHODS, result)
+      commit(types.SET_PAYMENT_METHODS, result ? result : [])
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
