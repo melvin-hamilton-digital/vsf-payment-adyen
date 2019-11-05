@@ -60,7 +60,7 @@ export default {
     },
 
     createForm () {
-      if (this.payment.paymentMethodAdditional && Object.keys(this.payment.paymentMethodAdditional).length) {
+      if (this.payment && this.payment.paymentMethodAdditional && Object.keys(this.payment.paymentMethodAdditional).length) {
         this.payment.paymentMethodAdditional = {}
       }
 

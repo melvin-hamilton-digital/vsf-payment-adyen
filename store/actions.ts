@@ -103,7 +103,7 @@ export const actions: ActionTree<AdyenState, any> = {
     }
   },
 
-  async initPayment ({ commit, rootGetters }, { method, additional_data, browserInfo }) {
+  async initPayment ({ commit, rootGetters, rootState }, { method, additional_data, browserInfo }) {
     const cartId = rootGetters['cart/getCartToken']
     if (!cartId) {
       console.error('[Adyen] CartId does not exist')
@@ -112,6 +112,11 @@ export const actions: ActionTree<AdyenState, any> = {
     let token = ''
     if (rootGetters['user/getUserToken']) {
       token = `?token=${rootGetters['user/getUserToken']}`
+    }
+
+    let customer_id = null
+    if (rootState.user.current && rootState.user.current.id) {
+      customer_id = rootState.user.current.id
     }
 
     try {
@@ -123,6 +128,7 @@ export const actions: ActionTree<AdyenState, any> = {
         },
         body: JSON.stringify({
           method,
+          ...(customer_id ? {customer_id} : {}),
           additional_data: {
             number: additional_data.encryptedCardNumber,
             expiryMonth: additional_data.encryptedExpiryMonth,
