@@ -8,8 +8,7 @@ import { Logger } from '@vue-storefront/core/lib/logger'
 import fetch from 'isomorphic-fetch'
 import config from 'config'
 import { currentStoreView } from '@vue-storefront/core/lib/multistore';
-
-const baseUrl = `${config.api.url}ext/payment-adyen/`
+import SideRequest from '@vue-storefront/core/lib/side-request';
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<AdyenState, any> = {
@@ -81,6 +80,9 @@ export const actions: ActionTree<AdyenState, any> = {
   // },
 
   async loadPaymentMethods ({ commit, rootGetters }, { cartId, country }) {
+    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+
+
     try {
       const { storeCode } = currentStoreView()
       let token = ''
@@ -118,6 +120,8 @@ export const actions: ActionTree<AdyenState, any> = {
     if (rootState.user.current && rootState.user.current.id) {
       customer_id = rootState.user.current.id
     }
+
+    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
 
     try {
       const { storeCode } = currentStoreView()
