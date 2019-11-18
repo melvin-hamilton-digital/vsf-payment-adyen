@@ -28,13 +28,18 @@ const collectBrowserInfo = () => {
     const timeZoneOffset = d.getTimezoneOffset();
 
     const browserInfo = {
-        screenWidth,
-        screenHeight,
-        colorDepth,
+        // screenWidth,
+        screen_width: screenWidth,
+        // screenHeight,
+        screen_height: screenHeight,
+        // colorDepth,
+        screen_color_depth: colorDepth,
         userAgent,
-        timeZoneOffset,
+        // timeZoneOffset,
+        timezone_offset: timeZoneOffset,
         language,
-        javaEnabled,
+        // javaEnabled,
+        java_enabled: javaEnabled,
     };
 
     return browserInfo;

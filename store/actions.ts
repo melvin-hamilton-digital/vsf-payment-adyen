@@ -139,8 +139,52 @@ export const actions: ActionTree<AdyenState, any> = {
             cvc: additional_data.encryptedSecurityCode,
             expiryYear: additional_data.encryptedExpiryYear,
             holderName: additional_data.holderName,
-            ...browserInfo
+            ...browserInfo,
+            allow3DS2: true,
+            channel: 'web'
           }
+        })
+      })
+
+      let { result } = await response.json()
+
+      return result
+      
+    } catch (err) {
+      console.error('[Adyen Payments]', err)
+    }
+  },
+
+  async fingerprint3ds ({ commit, rootGetters, rootState }, { fingerprint, noPaymentData = false, challenge = false }) {
+    const cartId = rootGetters['cart/getCartToken']
+    if (!cartId) {
+      console.error('[Adyen] CartId does not exist')
+      return
+    }
+    let token = ''
+    if (rootGetters['user/getUserToken']) {
+      token = `?token=${rootGetters['user/getUserToken']}`
+    }
+
+    let customer_id = null
+    if (rootState.user.current && rootState.user.current.id) {
+      customer_id = rootState.user.current.id
+    }
+
+    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+
+    try {
+      const { storeCode } = currentStoreView()
+      let response = await fetch(`${baseUrl}payment/fingerprint/${storeCode}/${cartId}${token}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          fingerprint,
+          ...(customer_id ? {customer_id} : {}),
+          ...(noPaymentData ? {noPaymentData} : {}),
+          ...(challenge ? {challenge} : {})
         })
       })
 
