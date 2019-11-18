@@ -38,19 +38,17 @@ export default {
     };
   },
 
-  mounted() {
+  async mounted() {
     if (!document.getElementById('adyen-secured-fields')) {
       if (typeof window !== 'undefined') {
-        let promise = this.loadScript(
-          'https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js'
-        );
-        promise
-          .then(() => {
-            this.createForm();
-          })
-          .catch(e => {
-            console.info(e, 'adyen error');
-          });
+        try {
+          await this.loadScript(
+            'https://checkoutshopper-live.adyen.com/checkoutshopper/sdk/3.3.0/adyen.js'
+          );
+          this.createForm();
+        } catch (err) {
+          console.info(err, "Couldnt fetch adyen's library");
+        }
       }
     } else {
       this.createForm();
@@ -58,6 +56,9 @@ export default {
   },
 
   methods: {
+    /**
+     * @description - Dynamicly fetches AdyenCheckout class
+     */
     loadScript(src) {
       return new Promise((resolve, reject) => {
         let script = document.createElement('script');
@@ -126,10 +127,12 @@ export default {
               name: 'PayPal'
             }
           },
+
           onSubmit: async (state, dropin) => {
             try {
               const storeView = currentStoreView();
 
+              // Initiate payment
               let result = await this.$store.dispatch(
                 'payment-adyen/initPayment',
                 {
@@ -139,14 +142,14 @@ export default {
                   },
                   browserInfo: {
                     ...collectBrowserInfo(),
-                    language: storeView.i18n.defaultLocale
+                    language: storeView.i18n.defaultLocale,
+                    origin: window.location.origin
                   }
                 }
               );
 
+              // If it requires 3DS Auth
               if (result.threeDS2) {
-                console.log('Result from init', result);
-                // alert('We currently does not support 3d card payment')
                 const { token, type } = result;
                 this.payloadToSend = {
                   method: state.data.paymentMethod.type,
@@ -156,6 +159,8 @@ export default {
                   browserInfo: {
                     ...collectBrowserInfo(),
                     language: storeView.i18n.defaultLocale,
+                    // I am sending origin for my custom change in magento's Adyen
+                    // Then 3DS Challenge will send window.postMessage which can be only opened in the `origin`
                     origin: window.location.origin
                   }
                 };
@@ -165,10 +170,17 @@ export default {
                     this.renderThreeDS2Component('IdentifyShopper', token);
                     break;
                   default:
-                    alert('Unsupported cart type, sorry!');
+                    this.$store.dispatch('notification/spawnNotification', {
+                      type: 'error',
+                      message: i18n.t(
+                        'Unsupported authentication method: ' + type
+                      ),
+                      action1: { label: i18n.t('OK') }
+                    });
                     break;
                 }
               } else {
+                // 3DS Auth not needed, go further...
                 this.$emit('payed', {
                   method: state.data.paymentMethod.type,
                   additional_data: {
@@ -176,123 +188,107 @@ export default {
                   },
                   browserInfo: {
                     ...collectBrowserInfo(),
-                    language: storeView.i18n.defaultLocale
+                    language: storeView.i18n.defaultLocale,
+                    origin: window.location.origin
                   }
                 });
               }
             } catch (err) {
-              console.error(err);
+              console.error(err, 'Adyen');
             }
-          },
-          onAdditionalDetails: (state, dropin) => {
-            console.log('additionlDetails', state, dropin);
           }
         })
         .mount('#adyen-payments-dropin');
     },
 
     renderThreeDS2Component(type, token) {
-      const threeDS2Node = document.getElementById('threeDS2Container');
-
       const self = this;
 
-      if (type == 'IdentifyShopper') {
-        this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
-          'threeDS2DeviceFingerprint',
-          {
-            fingerprintToken: token,
-            async onComplete({ data }) {
-
-              // It sends request to /adyen/threeDS2Process
-              if (
-                !data &&
-                data.details &&
-                data.details['threeds2.fingerprint']
-              ) {
-                self.$store.dispatch('notification/spawnNotification', {
-                  type: 'error',
-                  message: i18n.t('Could not verify card data, sorry...'),
-                  action1: { label: i18n.t('OK') }
-                });
-                return;
+      this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
+        'threeDS2DeviceFingerprint',
+        {
+          fingerprintToken: token,
+          async onComplete({ data }) {
+            // It sends request to /adyen/threeDS2Process
+            if (!data && data.details && data.details['threeds2.fingerprint']) {
+              self.$store.dispatch('notification/spawnNotification', {
+                type: 'error',
+                message: i18n.t('Could not verify card data, sorry...'),
+                action1: { label: i18n.t('OK') }
+              });
+              return;
+            }
+            let response = await self.$store.dispatch(
+              'payment-adyen/fingerprint3ds',
+              {
+                fingerprint:
+                  data && data.details && data.details['threeds2.fingerprint']
               }
-              let response = await self.$store.dispatch(
-                'payment-adyen/fingerprint3ds',
+            );
+
+            if (response.threeDS2) {
+              // ChallengeShopper
+              // Open fullscreen modal
+              self.threedsChallenge = true;
+
+              // Create Challenge component
+              self.threeDS2ChallengeComponent = self.adyenCheckoutInstance.create(
+                'threeDS2Challenge',
                 {
-                  fingerprint:
-                    data && data.details && data.details['threeds2.fingerprint']
+                  challengeToken: response.token,
+                  // We have a few sizes, 05 is full 100% width 100% height
+                  // Other ones have certain sizes
+                  size: '05',
+                  async onComplete({ data }) {
+                    if (
+                      data &&
+                      data.details &&
+                      data.details['threeds2.challengeResult']
+                    ) {
+                      let challengeResponse = await self.$store.dispatch(
+                        'payment-adyen/fingerprint3ds',
+                        {
+                          fingerprint: data.details['threeds2.challengeResult'],
+                          challenge: true,
+                          noPaymentData: true
+                        }
+                      );
+
+                      self.threedsChallenge = false;
+
+                      // Finish the hardest way
+                      self.$emit('payed', self.payloadToSend);
+                    } else {
+                      this.$store.dispatch('notification/spawnNotification', {
+                        type: 'error',
+                        message: i18n.t('Challenge authentication failed'),
+                        action1: { label: i18n.t('OK') }
+                      });
+                    }
+                  },
+                  onError(error) {
+                    console.log('error', error);
+                  }
                 }
               );
-
-              if (response.threeDS2) {
-                // ChallengeShopper
-                const threeDS2ChallengeNode = document.getElementById(
-                  'threeDS2Challenge'
-                );
-
-                self.threedsChallenge = true
-
-                self.threeDS2ChallengeComponent = self.adyenCheckoutInstance.create(
-                  'threeDS2Challenge',
-                  {
-                    challengeToken: response.token,
-                    token: response.token,
-                    size: '05',
-                    async onComplete({ data }) {
-                      if (
-                        data &&
-                        data.details &&
-                        data.details['threeds2.challengeResult']
-                      ) {
-                        let challengeResponse = await self.$store.dispatch(
-                          'payment-adyen/fingerprint3ds',
-                          {
-                            fingerprint: data.details['threeds2.challengeResult'],
-                            challenge: true,
-                            noPaymentData: true
-                          }
-                        );
-
-                        self.threedsChallenge = false
-
-                        // Finish the hardest way
-                        self.$emit('payed', self.payloadToSend);
-
-                      } else {
-                        console.error('Smth went wrong!');
-                      }
-                    },
-                    onError(error) {
-                      console.log('error', error);
-                    }
-                  }
-                );
-                self.threeDS2ChallengeComponent.mount(threeDS2ChallengeNode);
-              } else {
-                self.$emit('payed', this.payloadToSend);
-              }
-
-              // threeds2.processThreeDS2(result.data).done(function (responseJSON) {
-              //   this.validateThreeDS2OrPlaceOrder(responseJSON)
-              // }).error(function () {
-              //   this.isPlaceOrderActionAllowed(true);
-              //   fullScreenLoader.stopLoader();
-              // });
-            },
-            onError: function(error) {
-              console.log(JSON.stringify(error));
+              self.threeDS2ChallengeComponent.mount('#threeDS2Challenge');
+            } else {
+              self.$emit('payed', this.payloadToSend);
             }
+
+          },
+          onError (error) {
+            console.log('Error', error);
           }
-        );
-        this.threeDS2IdentifyComponent.mount(threeDS2Node);
-      }
+        }
+      );
+      this.threeDS2IdentifyComponent.mount('#threeDS2Container');
     }
   }
 };
 </script>
 
 <style>
-
 .threeds-challenge {
   position: fixed;
   width: 100%;
