@@ -2,7 +2,11 @@
   <div class="adyen-block">
     <div id="adyen-payments-dropin"></div>
     <div id="threeDS2Container"></div>
-    <div id="threeDS2Challenge"></div>
+    <transition name="fade">
+      <div class="threeds-challenge" v-show="threedsChallenge">
+        <div id="threeDS2Challenge"></div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -29,7 +33,8 @@ export default {
       threeDS2IdentifyComponent: null,
       threeDS2ChallengeComponent: null,
       payloadToSend: null,
-      dropin: null
+      dropin: null,
+      threedsChallenge: false
     };
   },
 
@@ -197,11 +202,6 @@ export default {
           {
             fingerprintToken: token,
             async onComplete({ data }) {
-              //               data:
-              // details:
-              // threeds2.fingerprint: "eyJ0aHJlZURTQ29tcEluZCI6IlUifQ=="
-              // __proto__: Object
-              // paymentData: ""
 
               // It sends request to /adyen/threeDS2Process
               if (
@@ -230,6 +230,8 @@ export default {
                   'threeDS2Challenge'
                 );
 
+                self.threedsChallenge = true
+
                 self.threeDS2ChallengeComponent = self.adyenCheckoutInstance.create(
                   'threeDS2Challenge',
                   {
@@ -251,6 +253,8 @@ export default {
                           }
                         );
 
+                        self.threedsChallenge = false
+
                         // Finish the hardest way
                         self.$emit('payed', self.payloadToSend);
 
@@ -264,8 +268,6 @@ export default {
                   }
                 );
                 self.threeDS2ChallengeComponent.mount(threeDS2ChallengeNode);
-                // console.log(challengeResponse);
-                // debugger;
               } else {
                 self.$emit('payed', this.payloadToSend);
               }
@@ -282,86 +284,7 @@ export default {
             }
           }
         );
-        console.log('here');
         this.threeDS2IdentifyComponent.mount(threeDS2Node);
-      } else if (type == 'ChallengeShopper') {
-        // fullScreenLoader.stopLoader();
-
-        // var popupModal = $('#threeDS2Modal').modal({
-        //   // disable user to hide popup
-        //   clickableOverlay: false,
-        //   // empty buttons, we don't need that
-        //   buttons: [],
-        //   modalClass: 'threeDS2Modal'
-        // });
-
-        // popupModal.modal("openModal");
-
-        this.threeDS2ChallengeComponent = this.adyenCheckoutInstance.create(
-          'threeDS2Challenge',
-          {
-            challengeToken: token,
-            size: '05',
-            onComplete(result) {
-              this.closeModal(popupModal);
-
-              // fullScreenLoader.startLoader();
-              // threeds2.processThreeDS2(result.data).done(function (responseJSON) {
-              //   this.validateThreeDS2OrPlaceOrder(responseJSON);
-              // }).error(function () {
-              //   this.isPlaceOrderActionAllowed(true);
-              //   fullScreenLoader.stopLoader();
-              // });
-            },
-            onError(error) {
-              this.closeModal(popupModal);
-              console.log(JSON.stringify(error));
-            }
-          }
-        );
-
-        this.threeDS2ChallengeComponent.mount(threeDS2Node);
-      }
-    },
-
-    closeModal(popupModal) {
-      popupModal.modal('closeModal');
-      $('.threeDS2Modal').remove();
-      $('.modals-overlay').remove();
-
-      // reconstruct the threeDS2Modal container again otherwise component can not find the threeDS2Modal
-      $('#threeDS2Wrapper').append(
-        '<div id="threeDS2Modal">' +
-          '<div id="threeDS2Container"></div>' +
-          '</div>'
-      );
-    },
-
-    validateThreeDS2OrPlaceOrder: function(responseJSON) {
-      var response = JSON.parse(responseJSON);
-
-      if (!!response.threeDS2) {
-        // render component
-        this.renderThreeDS2Component(response.type, response.token);
-      } else {
-        this.getPlaceOrderDeferredObject()
-          .fail(function() {
-            fullScreenLoader.stopLoader();
-            this.isPlaceOrderActionAllowed(true);
-          })
-          .done(function() {
-            this.afterPlaceOrder();
-
-            if (this.redirectAfterPlaceOrder) {
-              // use custom redirect Link for supporting 3D secure
-              window.location.replace(
-                url.build(
-                  window.checkoutConfig.payment[quote.paymentMethod().method]
-                    .redirectUrl
-                )
-              );
-            }
-          });
       }
     }
   }
@@ -369,6 +292,17 @@ export default {
 </script>
 
 <style>
+
+.threeds-challenge {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  background: #fff;
+  z-index: 2000;
+}
+
 .adyen-checkout__field {
   display: block;
   margin-bottom: 16px;
