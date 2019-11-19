@@ -167,7 +167,10 @@ export default {
 
                 switch (type) {
                   case 'IdentifyShopper':
-                    this.renderThreeDS2Component('IdentifyShopper', token);
+                    this.renderThreeDS2DeviceFingerprint(token);
+                    break;
+                  case 'ChallengeShopper':
+                    this.renderThreeDS2Challenge(token);
                     break;
                   default:
                     this.$store.dispatch('notification/spawnNotification', {
@@ -201,7 +204,7 @@ export default {
         .mount('#adyen-payments-dropin');
     },
 
-    renderThreeDS2Component(type, token) {
+    renderThreeDS2DeviceFingerprint(token) {
       const self = this;
 
       this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
@@ -228,61 +231,65 @@ export default {
 
             if (response.threeDS2) {
               // ChallengeShopper
-              // Open fullscreen modal
-              self.threedsChallenge = true;
-
-              // Create Challenge component
-              self.threeDS2ChallengeComponent = self.adyenCheckoutInstance.create(
-                'threeDS2Challenge',
-                {
-                  challengeToken: response.token,
-                  // We have a few sizes, 05 is full 100% width 100% height
-                  // Other ones have certain sizes
-                  size: '05',
-                  async onComplete({ data }) {
-                    if (
-                      data &&
-                      data.details &&
-                      data.details['threeds2.challengeResult']
-                    ) {
-                      let challengeResponse = await self.$store.dispatch(
-                        'payment-adyen/fingerprint3ds',
-                        {
-                          fingerprint: data.details['threeds2.challengeResult'],
-                          challenge: true,
-                          noPaymentData: true
-                        }
-                      );
-
-                      self.threedsChallenge = false;
-
-                      // Finish the hardest way
-                      self.$emit('payed', self.payloadToSend);
-                    } else {
-                      this.$store.dispatch('notification/spawnNotification', {
-                        type: 'error',
-                        message: i18n.t('Challenge authentication failed'),
-                        action1: { label: i18n.t('OK') }
-                      });
-                    }
-                  },
-                  onError(error) {
-                    console.log('error', error);
-                  }
-                }
-              );
-              self.threeDS2ChallengeComponent.mount('#threeDS2Challenge');
+              this.renderThreeDS2Challenge(response.token)
             } else {
               self.$emit('payed', this.payloadToSend);
             }
-
           },
-          onError (error) {
+          onError(error) {
             console.log('Error', error);
           }
         }
       );
       this.threeDS2IdentifyComponent.mount('#threeDS2Container');
+    },
+
+    renderThreeDS2Challenge(token) {
+      // Open fullscreen modal
+      this.threedsChallenge = true;
+
+      // Create Challenge component
+      const self = this
+      this.threeDS2ChallengeComponent = this.adyenCheckoutInstance.create(
+        'threeDS2Challenge',
+        {
+          challengeToken: token,
+          // We have a few sizes, 05 is full 100% width 100% height
+          // Other ones have certain sizes
+          size: '05',
+          async onComplete({ data }) {
+            if (
+              data &&
+              data.details &&
+              data.details['threeds2.challengeResult']
+            ) {
+              let challengeResponse = await self.$store.dispatch(
+                'payment-adyen/fingerprint3ds',
+                {
+                  fingerprint: data.details['threeds2.challengeResult'],
+                  challenge: true,
+                  noPaymentData: true
+                }
+              );
+
+              self.threedsChallenge = false;
+
+              // Finish the hardest way
+              self.$emit('payed', self.payloadToSend);
+            } else {
+              this.$store.dispatch('notification/spawnNotification', {
+                type: 'error',
+                message: i18n.t('Challenge authentication failed'),
+                action1: { label: i18n.t('OK') }
+              });
+            }
+          },
+          onError(error) {
+            console.log('error', error);
+          }
+        }
+      );
+      self.threeDS2ChallengeComponent.mount('#threeDS2Challenge');
     }
   }
 };
