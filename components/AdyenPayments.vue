@@ -232,7 +232,7 @@ export default {
 
             if (response.threeDS2) {
               // ChallengeShopper
-              this.renderThreeDS2Challenge(response.token)
+              self.renderThreeDS2Challenge(response.token)
             } else {
               self.$emit('payed', self.payloadToSend);
             }
