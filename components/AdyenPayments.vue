@@ -98,6 +98,7 @@ export default {
         }
       };
       this.adyenCheckoutInstance = new AdyenCheckout(configuration);
+      const self = this
 
       this.dropin = this.adyenCheckoutInstance
         .create('dropin', {
@@ -151,7 +152,7 @@ export default {
               // If it requires 3DS Auth
               if (result.threeDS2) {
                 const { token, type } = result;
-                this.payloadToSend = {
+                self.payloadToSend = {
                   method: state.data.paymentMethod.type,
                   additional_data: {
                     ...state.data.paymentMethod
@@ -167,13 +168,13 @@ export default {
 
                 switch (type) {
                   case 'IdentifyShopper':
-                    this.renderThreeDS2DeviceFingerprint(token);
+                    self.renderThreeDS2DeviceFingerprint(token);
                     break;
                   case 'ChallengeShopper':
-                    this.renderThreeDS2Challenge(token);
+                    self.renderThreeDS2Challenge(token);
                     break;
                   default:
-                    this.$store.dispatch('notification/spawnNotification', {
+                    self.$store.dispatch('notification/spawnNotification', {
                       type: 'error',
                       message: i18n.t(
                         'Unsupported authentication method: ' + type
@@ -184,7 +185,7 @@ export default {
                 }
               } else {
                 // 3DS Auth not needed, go further...
-                this.$emit('payed', {
+                self.$emit('payed', {
                   method: state.data.paymentMethod.type,
                   additional_data: {
                     ...state.data.paymentMethod
@@ -233,7 +234,7 @@ export default {
               // ChallengeShopper
               this.renderThreeDS2Challenge(response.token)
             } else {
-              self.$emit('payed', this.payloadToSend);
+              self.$emit('payed', self.payloadToSend);
             }
           },
           onError(error) {
