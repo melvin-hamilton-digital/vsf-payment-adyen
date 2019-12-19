@@ -100,6 +100,8 @@ export default {
       this.adyenCheckoutInstance = new AdyenCheckout(configuration);
       const self = this
 
+      const loggedIn = this.$store.getters['user/isLoggedIn']
+
       this.dropin = this.adyenCheckoutInstance
         .create('dropin', {
           paymentMethodsConfiguration: {
@@ -120,7 +122,7 @@ export default {
               // Example optional configuration for Cards
               hasHolderName: true,
               holderNameRequired: true,
-              enableStoreDetails: true,
+              enableStoreDetails: loggedIn,
               name: 'Credit or debit card'
             },
             paypal: {
@@ -145,7 +147,8 @@ export default {
                     ...collectBrowserInfo(),
                     language: storeView.i18n.defaultLocale,
                     origin: window.location.origin
-                  }
+                  },
+                  ...(state.data.storePaymentMethod ? { storePaymentMethod: state.data.storePaymentMethod } : {})
                 }
               );
 

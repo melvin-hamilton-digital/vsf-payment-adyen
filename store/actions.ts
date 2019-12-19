@@ -45,43 +45,9 @@ export const actions: ActionTree<AdyenState, any> = {
       Logger.error(reason) // it doesn't work on SSR
     })
   },
-  // backConfirmation ( { commit }, { route }) {
-  //   const adyenCollection = Vue.prototype.$db.adyenCollection
-  //   const merchantReference = adyenCollection.getItem('merchantReference',(err, result) => {
-  //     if (!err) {
-  //       axios.get(rootStore.state.config.adyen.paypalResultHandler, {
-  //         params: {
-  //           payload: route.query.payload,
-  //           resultCode: route.query.resultCode,
-  //           type: route.query.type,
-  //           merchantReference: result.value
-  //         }
-  //       })
-  //       .then((response) => {
-  //         if (response.data.code === 200) {
-  //           const adyenCollection = Vue.prototype.$db.adyenCollection
-  //           adyenCollection.removeItem('merchantReference',(err, result) => {
-  //             Vue.prototype.$bus.$emit('order-after-placed', { order: true, confirmation: "OK" })
-  //           }).catch((reason) => {
-  //             Logger.error(reason) // it doesn't work on SSR
-  //           })
-
-  //         }
-  //         return response
-  //       })
-  //       .then(data => {
-  //       })
-  //       .catch((err) => {
-  //         Logger.log(err)()
-  //         Logger.error('You need to install a custom Magento module from Snow.dog to make the CMS magick happen. Please go to https://github.com/SnowdogApps/magento2-cms-api and follow the instructions')()
-  //       })
-  //     }
-  //   })
-  // },
 
   async loadPaymentMethods ({ commit, rootGetters }, { cartId, country }) {
     const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
-
 
     try {
       const { storeCode } = currentStoreView()
@@ -105,7 +71,7 @@ export const actions: ActionTree<AdyenState, any> = {
     }
   },
 
-  async initPayment ({ commit, rootGetters, rootState }, { method, additional_data, browserInfo }) {
+  async initPayment ({ commit, rootGetters, rootState }, { method, additional_data, browserInfo, storePaymentMethod = {} }) {
     const cartId = rootGetters['cart/getCartToken']
     if (!cartId) {
       console.error('[Adyen] CartId does not exist')
@@ -133,6 +99,7 @@ export const actions: ActionTree<AdyenState, any> = {
         body: JSON.stringify({
           method,
           ...(customer_id ? {customer_id} : {}),
+          ...(storePaymentMethod ? {storePaymentMethod} : {}),
           additional_data: {
             number: additional_data.encryptedCardNumber,
             expiryMonth: additional_data.encryptedExpiryMonth,
