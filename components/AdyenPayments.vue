@@ -70,7 +70,7 @@ export default {
       });
     },
 
-    createForm() {
+    async createForm() {
       if (
         this.payment &&
         this.payment.paymentMethodAdditional &&
@@ -101,6 +101,10 @@ export default {
       const self = this
 
       const loggedIn = this.$store.getters['user/isLoggedIn']
+      // await this.$store.dispatch('payment-adyen/loadPaymentMethods', {
+
+      // })
+      await this.$store.dispatch("payment-adyen/loadPaymentMethods", {});
 
       this.dropin = this.adyenCheckoutInstance
         .create('dropin', {
@@ -123,6 +127,7 @@ export default {
               hasHolderName: true,
               holderNameRequired: true,
               enableStoreDetails: loggedIn,
+              showStoredPaymentMethods: loggedIn,
               name: 'Credit or debit card'
             },
             paypal: {

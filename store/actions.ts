@@ -46,7 +46,13 @@ export const actions: ActionTree<AdyenState, any> = {
     })
   },
 
-  async loadPaymentMethods ({ commit, rootGetters }, { cartId, country }) {
+  async loadPaymentMethods ({ commit, rootGetters }, { country }) {
+    const cartId = rootGetters['cart/getCartToken']
+    if (!cartId) {
+      console.error('[Adyen] CartId does not exist')
+      return
+    }
+
     const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
 
     try {
@@ -59,9 +65,9 @@ export const actions: ActionTree<AdyenState, any> = {
       let response = await fetch(`${baseUrl}methods/${storeCode}/${cartId}${token}`, {
         method: 'POST',
         body: JSON.stringify({
-          shippingAddress: {
+          ...(country ? { shippingAddress: {
             countryId: country
-          }
+          }} : {})
         })
       })
       let { result } = await response.json()
