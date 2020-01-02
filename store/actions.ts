@@ -77,7 +77,7 @@ export const actions: ActionTree<AdyenState, any> = {
     }
   },
 
-  async initPayment ({ commit, rootGetters, rootState }, { method, additional_data, browserInfo, storePaymentMethod = {} }) {
+  async initPayment ({ commit, rootGetters, rootState }, { method, additional_data, browserInfo, storePaymentMethod = false }) {
     const cartId = rootGetters['cart/getCartToken']
     if (!cartId) {
       console.error('[Adyen] CartId does not exist')
@@ -105,7 +105,6 @@ export const actions: ActionTree<AdyenState, any> = {
         body: JSON.stringify({
           method,
           ...(customer_id ? {customer_id} : {}),
-          ...(storePaymentMethod ? {storePaymentMethod} : {}),
           additional_data: {
             number: additional_data.encryptedCardNumber,
             expiryMonth: additional_data.encryptedExpiryMonth,
@@ -114,10 +113,13 @@ export const actions: ActionTree<AdyenState, any> = {
             holderName: additional_data.holderName,
             ...browserInfo,
             allow3DS2: true,
-            channel: 'web'
+            channel: 'web',
+            ...(storePaymentMethod ? { is_active_payment_token_enabler: !!storePaymentMethod } : {})
           }
         })
       })
+
+      commit(types.SET_SAVE_CARD, !!storePaymentMethod)
 
       let { result } = await response.json()
 
@@ -168,5 +170,9 @@ export const actions: ActionTree<AdyenState, any> = {
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
+  },
+
+  setSaveCard ({ commit }, value) {
+    commit(types.SET_SAVE_CARD, value)
   }
 }

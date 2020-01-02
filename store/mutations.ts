@@ -18,5 +18,8 @@ export const mutations: MutationTree<any> = {
   },
   [types.SET_PAYMENT_METHODS] (state, result) {
     state.paymentMethods = result
+  },
+  [types.SET_SAVE_CARD] (state, value) {
+    state.saveCard = value
   }
 }

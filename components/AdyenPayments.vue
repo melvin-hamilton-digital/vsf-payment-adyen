@@ -34,7 +34,17 @@ export default {
       threeDS2ChallengeComponent: null,
       payloadToSend: null,
       dropin: null,
-      threedsChallenge: false
+      threedsChallenge: false,
+      cardMaps: {
+        "amex":"AE",
+        "discover":"DI",
+        "jcb":"JCB",
+        "mc":"MC",
+        "visa":"VI",
+        "maestro":"MI",
+        "diners":"DN",
+        "unionpay":"CUP"
+      }
     };
   },
 
@@ -128,7 +138,8 @@ export default {
               holderNameRequired: true,
               enableStoreDetails: loggedIn,
               showStoredPaymentMethods: loggedIn,
-              name: 'Credit or debit card'
+              name: 'Credit or debit card',
+              brands: Object.keys(self.cardMaps)
             },
             paypal: {
               enableStoreDetails: true,
