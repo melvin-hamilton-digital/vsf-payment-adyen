@@ -7,6 +7,10 @@ export const getters: GetterTree<AdyenState, any> = {
     return state.paymentMethods.map(payment => ({ type: payment.type, title: payment.title }))
   },
 
+  cards (state) {
+    return state.loadedCards
+  },
+
   saveCard: state => state.saveCard
 
 }

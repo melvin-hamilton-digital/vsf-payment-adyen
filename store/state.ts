@@ -4,5 +4,6 @@ export const state: AdyenState = {
     isAdyenValid: false,
     adyenCard: {},
     paymentMethods: [],
-    saveCard: false
+    saveCard: false,
+    loadedCards: []
 }

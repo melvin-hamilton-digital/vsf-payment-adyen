@@ -7,7 +7,7 @@ import Vue from 'vue';
 import { Logger } from '@vue-storefront/core/lib/logger'
 import fetch from 'isomorphic-fetch'
 import config from 'config'
-import { currentStoreView } from '@vue-storefront/core/lib/multistore';
+import { currentStoreView, adjustMultistoreApiUrl } from '@vue-storefront/core/lib/multistore';
 import SideRequest from '@vue-storefront/core/lib/side-request';
 
 // it's a good practice for all actions to return Promises with effect of their execution
@@ -46,6 +46,27 @@ export const actions: ActionTree<AdyenState, any> = {
     })
   },
 
+  async loadVault ({ commit, rootGetters }) {
+
+    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+
+    try {
+      let token = ''
+      if (rootGetters['user/getUserToken']) {
+        token = `?token=${rootGetters['user/getUserToken']}`
+      }
+      
+      let response = await fetch(adjustMultistoreApiUrl(`${baseUrl}vault${token}`), {
+        method: 'POST'
+      })
+      let { result } = await response.json()
+      commit(types.SET_LOADED_CARDS, result)
+      console.log(result)
+    } catch (err) {
+      console.error('[Adyen Payments]', err)
+    }
+  },
+
   async loadPaymentMethods ({ commit, rootGetters }, { country }) {
     const cartId = rootGetters['cart/getCartToken']
     if (!cartId) {
@@ -71,6 +92,7 @@ export const actions: ActionTree<AdyenState, any> = {
         })
       })
       let { result } = await response.json()
+      console.log(result)
       commit(types.SET_PAYMENT_METHODS, result ? result : [])
     } catch (err) {
       console.error('[Adyen Payments]', err)
@@ -114,7 +136,12 @@ export const actions: ActionTree<AdyenState, any> = {
             ...browserInfo,
             allow3DS2: true,
             channel: 'web',
-            ...(storePaymentMethod ? { is_active_payment_token_enabler: !!storePaymentMethod } : {})
+            ...(storePaymentMethod ? { is_active_payment_token_enabler: !!storePaymentMethod } : {}),
+            ...(additional_data.storedPaymentMethodId ? {
+              storedPaymentMethodId: additional_data.storedPaymentMethodId,
+              shopperInteraction: 'ContAuth',
+              recurringProcessingModel: 'CardOnFile'
+            } : {})
           }
         })
       })

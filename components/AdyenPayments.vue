@@ -95,6 +95,17 @@ export default {
         console.error('[Adyen] Set origin key in the config!');
       }
 
+      const storedPaymentMethods = this.$store.getters['payment-adyen/cards']
+      
+      if (this.$store.getters['user/isLoggedIn']) {
+        await Promise.all([
+          this.$store.dispatch("payment-adyen/loadVault"),
+          this.$store.dispatch("payment-adyen/loadPaymentMethods", {})
+        ]);
+      } else {
+        await this.$store.dispatch("payment-adyen/loadPaymentMethods", {})
+      }
+
       const configuration = {
         locale: 'en-US',
         environment: 'test',
@@ -104,6 +115,11 @@ export default {
           // For now only scheme === adyen_cc
           paymentMethods: this.$store.getters['payment-adyen/methods'].filter(
             method => method.type === 'scheme'
+          ),
+          ...(
+            this.$store.getters['payment-adyen/cards'] && !!this.$store.getters['payment-adyen/cards'].length
+            ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
+            : {}
           )
         }
       };
@@ -111,10 +127,8 @@ export default {
       const self = this
 
       const loggedIn = this.$store.getters['user/isLoggedIn']
-      // await this.$store.dispatch('payment-adyen/loadPaymentMethods', {
 
-      // })
-      await this.$store.dispatch("payment-adyen/loadPaymentMethods", {});
+      console.log()
 
       this.dropin = this.adyenCheckoutInstance
         .create('dropin', {
@@ -150,6 +164,8 @@ export default {
           onSubmit: async (state, dropin) => {
             try {
               const storeView = currentStoreView();
+
+              console.log(state)
 
               // Initiate payment
               let result = await this.$store.dispatch(
