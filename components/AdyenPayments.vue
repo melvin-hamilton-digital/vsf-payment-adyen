@@ -128,8 +128,6 @@ export default {
 
       const loggedIn = this.$store.getters['user/isLoggedIn']
 
-      console.log()
-
       this.dropin = this.adyenCheckoutInstance
         .create('dropin', {
           paymentMethodsConfiguration: {
@@ -166,9 +164,38 @@ export default {
             try {
               const storeView = currentStoreView();
 
+              // Initiate payment
               console.log(state)
 
-              // Initiate payment
+              if (!!state.data.paymentMethod.storedPaymentMethodId) {
+                const cards = self.$store.getters['payment-adyen/cards']
+                const card = cards.find(card => card.id === state.data.paymentMethod.storedPaymentMethodId)
+                if (card) {
+                  console.log(card, 'CARD')
+                  self.$store.dispatch('payment-adyen/setPublicHash', card.public_hash)
+                  self.$emit('payed', {
+                    method: state.data.paymentMethod.type,
+                    additional_data: {
+                      ...state.data.paymentMethod
+                    },
+                    browserInfo: {
+                      ...collectBrowserInfo(),
+                      language: storeView.i18n.defaultLocale,
+                      origin: window.location.origin
+                    }
+                  });
+                } else {
+                  self.$store.dispatch('notification/spawnNotification', {
+                    type: 'error',
+                    message: i18n.t(
+                      'Bad data provided for the card'
+                    ),
+                    action1: { label: i18n.t('OK') }
+                  });
+                }
+                return
+              }
+
               let result = await this.$store.dispatch(
                 'payment-adyen/initPayment',
                 {

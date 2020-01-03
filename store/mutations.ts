@@ -25,8 +25,9 @@ export const mutations: MutationTree<any> = {
 
   [types.SET_LOADED_CARDS] (state, value) {
     state.loadedCards = value.map(card => {
-      const { type, maskedCC, expirationDate, public_hash } = JSON.parse(card.token_details)
+      const { type, maskedCC, expirationDate } = JSON.parse(card.token_details)
       const [ expiryMonth, expiryYear ] = expirationDate.split('/')
+
       return {
         brand: type,
         expiryMonth: expiryMonth,
@@ -39,7 +40,7 @@ export const mutations: MutationTree<any> = {
           "ContAuth"
         ],
         holderName: 'You',
-        // public_hash,
+        public_hash: card.public_hash,
         type: "scheme"
       }
     })
