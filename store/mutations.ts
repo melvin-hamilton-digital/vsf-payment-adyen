@@ -38,6 +38,7 @@ export const mutations: MutationTree<any> = {
           "Ecommerce",
           "ContAuth"
         ],
+        holderName: 'You',
         // public_hash,
         type: "scheme"
       }
@@ -47,5 +48,5 @@ export const mutations: MutationTree<any> = {
   [types.SET_PUBLIC_HASH] (state, value) {
     state.publicHash = value
   }
-  
+
 }

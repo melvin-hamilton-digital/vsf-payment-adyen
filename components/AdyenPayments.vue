@@ -153,7 +153,8 @@ export default {
               enableStoreDetails: loggedIn,
               showStoredPaymentMethods: loggedIn,
               name: 'Credit or debit card',
-              brands: Object.keys(self.cardMaps)
+              brands: Object.keys(self.cardMaps),
+              hideCVC: true
             },
             paypal: {
               enableStoreDetails: true,
