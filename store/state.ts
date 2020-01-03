@@ -5,5 +5,6 @@ export const state: AdyenState = {
     adyenCard: {},
     paymentMethods: [],
     saveCard: false,
-    loadedCards: []
+    loadedCards: [],
+    publicHash: null
 }

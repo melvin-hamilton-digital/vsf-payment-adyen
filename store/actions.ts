@@ -201,5 +201,10 @@ export const actions: ActionTree<AdyenState, any> = {
 
   setSaveCard ({ commit }, value) {
     commit(types.SET_SAVE_CARD, value)
+  },
+
+  setPublicHash ({ commit }, value) {
+    commit(types.SET_PUBLIC_HASH, value)
   }
+
 }

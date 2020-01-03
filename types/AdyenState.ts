@@ -25,5 +25,6 @@ export interface AdyenState {
     adyenCard: any | null,
     paymentMethods: Array<PaymentMethod>,
     saveCard: Boolean,
-    loadedCards: Array<any>
+    loadedCards: Array<any>,
+    publicHash: string | null
 }
