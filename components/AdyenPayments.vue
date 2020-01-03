@@ -151,8 +151,7 @@ export default {
               enableStoreDetails: loggedIn,
               showStoredPaymentMethods: loggedIn,
               name: 'Credit or debit card',
-              brands: Object.keys(self.cardMaps),
-              hideCVC: true
+              brands: Object.keys(self.cardMaps)
             },
             paypal: {
               enableStoreDetails: true,
@@ -160,18 +159,19 @@ export default {
             }
           },
 
+          onSelect (state, dropin) {
+            state.props.hasCVC = !state.props.storedPaymentMethodId
+          },
+
           onSubmit: async (state, dropin) => {
             try {
               const storeView = currentStoreView();
 
               // Initiate payment
-              console.log(state)
-
               if (!!state.data.paymentMethod.storedPaymentMethodId) {
                 const cards = self.$store.getters['payment-adyen/cards']
                 const card = cards.find(card => card.id === state.data.paymentMethod.storedPaymentMethodId)
                 if (card) {
-                  console.log(card, 'CARD')
                   self.$store.dispatch('payment-adyen/setPublicHash', card.public_hash)
                   self.$emit('payed', {
                     method: state.data.paymentMethod.type,
