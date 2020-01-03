@@ -117,7 +117,7 @@ export default {
             method => method.type === 'scheme'
           ),
           ...(
-            this.$store.getters['payment-adyen/cards'] && !!this.$store.getters['payment-adyen/cards'].length
+            this.$store.getters['user/isLoggedIn'] && this.$store.getters['payment-adyen/cards'] && !!this.$store.getters['payment-adyen/cards'].length
             ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
             : {}
           )

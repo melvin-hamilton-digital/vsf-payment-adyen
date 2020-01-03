@@ -24,6 +24,7 @@ export function afterRegistration({ Vue, store, isServer }) {
 
         Vue.prototype.$bus.$on('checkout-after-created', () => {
             store.dispatch('payment-adyen/setPublicHash', null)
+            store.dispatch('payment-adyen/setSaveCard', [])
         })
     }
 }
