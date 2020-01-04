@@ -26,5 +26,10 @@ export function afterRegistration({ Vue, store, isServer }) {
             store.dispatch('payment-adyen/setPublicHash', null)
             store.dispatch('payment-adyen/setSaveCard', [])
         })
+
+        Vue.prototype.$bus.$on('user-after-logout', () => {
+            store.dispatch('payment-adyen/setPublicHash', null)
+            store.dispatch('payment-adyen/setSaveCard', [])
+        })
     }
 }
