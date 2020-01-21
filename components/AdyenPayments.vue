@@ -153,10 +153,10 @@ export default {
               name: 'Credit or debit card',
               brands: Object.keys(self.cardMaps)
             },
-            paypal: {
-              enableStoreDetails: true,
-              name: 'PayPal'
-            }
+            // paypal: {
+            //   enableStoreDetails: true,
+            //   name: 'PayPal'
+            // }
           },
 
           onSelect (state, dropin) {
