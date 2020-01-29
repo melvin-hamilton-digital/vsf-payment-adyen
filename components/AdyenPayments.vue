@@ -246,6 +246,12 @@ export default {
                     });
                     break;
                 }
+              } else if (result.errorMessage) {
+                self.$store.dispatch('notification/spawnNotification', {
+                  type: 'error',
+                  message: result.errorMessage,
+                  action1: { label: i18n.t('OK') }
+                });
               } else {
                 // 3DS Auth not needed, go further...
                 self.$emit('payed', {
