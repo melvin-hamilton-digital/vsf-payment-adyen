@@ -110,10 +110,10 @@ export const actions: ActionTree<AdyenState, any> = {
       token = `?token=${rootGetters['user/getUserToken']}`
     }
 
-    let customer_id = null
-    if (rootState.user.current && rootState.user.current.id) {
-      customer_id = rootState.user.current.id
-    }
+    // let customer_id = null
+    // if (rootState.user.current && rootState.user.current.id) {
+    //   customer_id = rootState.user.current.id
+    // }
 
     const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
 
@@ -126,7 +126,6 @@ export const actions: ActionTree<AdyenState, any> = {
         },
         body: JSON.stringify({
           method,
-          ...(customer_id ? {customer_id} : {}),
           additional_data: {
             number: additional_data.encryptedCardNumber,
             expiryMonth: additional_data.encryptedExpiryMonth,
@@ -168,10 +167,10 @@ export const actions: ActionTree<AdyenState, any> = {
       token = `?token=${rootGetters['user/getUserToken']}`
     }
 
-    let customer_id = null
-    if (rootState.user.current && rootState.user.current.id) {
-      customer_id = rootState.user.current.id
-    }
+    // let customer_id = null
+    // if (rootState.user.current && rootState.user.current.id) {
+    //   customer_id = rootState.user.current.id
+    // }
 
     const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
 
@@ -184,7 +183,6 @@ export const actions: ActionTree<AdyenState, any> = {
         },
         body: JSON.stringify({
           fingerprint,
-          ...(customer_id ? {customer_id} : {}),
           ...(noPaymentData ? {noPaymentData} : {}),
           ...(challenge ? {challenge} : {})
         })
