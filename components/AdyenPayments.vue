@@ -1,12 +1,12 @@
 <template>
   <div class="adyen-block">
     <div id="adyen-payments-dropin"></div>
-    <div id="threeDS2Container"></div>
+    <!-- <div id="threeDS2Container"></div>
     <transition name="fade">
       <div class="threeds-challenge" v-show="threedsChallenge">
         <div id="threeDS2Challenge"></div>
       </div>
-    </transition>
+    </transition> -->
   </div>
 </template>
 
@@ -167,23 +167,24 @@ export default {
             try {
               const storeView = currentStoreView();
 
-              // Initiate payment
+              // Saved card needs only that
               if (!!state.data.paymentMethod.storedPaymentMethodId) {
                 const cards = self.$store.getters['payment-adyen/cards']
                 const card = cards.find(card => card.id === state.data.paymentMethod.storedPaymentMethodId)
                 if (card) {
                   self.$store.dispatch('payment-adyen/setPublicHash', card.public_hash)
-                  self.$emit('payed', {
-                    method: state.data.paymentMethod.type,
-                    additional_data: {
-                      ...state.data.paymentMethod
-                    },
-                    browserInfo: {
-                      ...collectBrowserInfo(),
-                      language: storeView.i18n.defaultLocale,
-                      origin: window.location.origin
-                    }
-                  });
+                  this.$emit('providedAdyenData')
+                  // self.$emit('payed', {
+                  //   method: state.data.paymentMethod.type,
+                  //   additional_data: {
+                  //     ...state.data.paymentMethod
+                  //   },
+                  //   browserInfo: {
+                  //     ...collectBrowserInfo(),
+                  //     language: storeView.i18n.defaultLocale,
+                  //     origin: window.location.origin
+                  //   }
+                  // });
                 } else {
                   self.$store.dispatch('notification/spawnNotification', {
                     type: 'error',
@@ -196,76 +197,94 @@ export default {
                 return
               }
 
-              let result = await this.$store.dispatch(
-                'payment-adyen/initPayment',
-                {
-                  method: state.data.paymentMethod.type,
-                  additional_data: {
-                    ...state.data.paymentMethod
-                  },
-                  browserInfo: {
-                    ...collectBrowserInfo(),
-                    language: storeView.i18n.defaultLocale,
-                    origin: window.location.origin
-                  },
-                  ...(state.data.storePaymentMethod ? { storePaymentMethod: state.data.storePaymentMethod } : {})
-                }
-              );
+              this.$store.dispatch('payment-adyen/setCardData', {
+                method: state.data.paymentMethod.type,
+                additional_data: {
+                  ...state.data.paymentMethod
+                },
+                browserInfo: {
+                  ...collectBrowserInfo(),
+                  language: storeView.i18n.defaultLocale,
+                  origin: window.location.origin
+                },
+                ...(state.data.storePaymentMethod ? { storePaymentMethod: state.data.storePaymentMethod } : {})
+              })
+
+              this.$emit('providedAdyenData')
+
+              // And that's all!
+              // For now...
+
+              // let result = await this.$store.dispatch(
+              //   'payment-adyen/initPayment',
+              //   {
+              //     method: state.data.paymentMethod.type,
+              //     additional_data: {
+              //       ...state.data.paymentMethod
+              //     },
+              //     browserInfo: {
+              //       ...collectBrowserInfo(),
+              //       language: storeView.i18n.defaultLocale,
+              //       origin: window.location.origin
+              //     },
+              //     ...(state.data.storePaymentMethod ? { storePaymentMethod: state.data.storePaymentMethod } : {})
+              //   }
+              // );
 
               // If it requires 3DS Auth
-              if (result.threeDS2) {
-                const { token, type } = result;
-                self.payloadToSend = {
-                  method: state.data.paymentMethod.type,
-                  additional_data: {
-                    ...state.data.paymentMethod
-                  },
-                  browserInfo: {
-                    ...collectBrowserInfo(),
-                    language: storeView.i18n.defaultLocale,
-                    // I am sending origin for my custom change in magento's Adyen
-                    // Then 3DS Challenge will send window.postMessage which can be only opened in the `origin`
-                    origin: window.location.origin
-                  }
-                };
+              // if (result.threeDS2) {
+              //   const { token, type } = result;
+              //   self.payloadToSend = {
+              //     method: state.data.paymentMethod.type,
+              //     additional_data: {
+              //       ...state.data.paymentMethod
+              //     },
+              //     browserInfo: {
+              //       ...collectBrowserInfo(),
+              //       language: storeView.i18n.defaultLocale,
+              //       // I am sending origin for my custom change in magento's Adyen
+              //       // Then 3DS Challenge will send window.postMessage which can be only opened in the `origin`
+              //       origin: window.location.origin
+              //     }
+              //   };
 
-                switch (type) {
-                  case 'IdentifyShopper':
-                    self.renderThreeDS2DeviceFingerprint(token);
-                    break;
-                  case 'ChallengeShopper':
-                    self.renderThreeDS2Challenge(token);
-                    break;
-                  default:
-                    self.$store.dispatch('notification/spawnNotification', {
-                      type: 'error',
-                      message: i18n.t(
-                        'Unsupported authentication method: ' + type
-                      ),
-                      action1: { label: i18n.t('OK') }
-                    });
-                    break;
-                }
-              } else if (result.errorMessage) {
-                self.$store.dispatch('notification/spawnNotification', {
-                  type: 'error',
-                  message: result.errorMessage,
-                  action1: { label: i18n.t('OK') }
-                });
-              } else {
-                // 3DS Auth not needed, go further...
-                self.$emit('payed', {
-                  method: state.data.paymentMethod.type,
-                  additional_data: {
-                    ...state.data.paymentMethod
-                  },
-                  browserInfo: {
-                    ...collectBrowserInfo(),
-                    language: storeView.i18n.defaultLocale,
-                    origin: window.location.origin
-                  }
-                });
-              }
+              //   switch (type) {
+              //     case 'IdentifyShopper':
+              //       self.renderThreeDS2DeviceFingerprint(token);
+              //       break;
+              //     case 'ChallengeShopper':
+              //       self.renderThreeDS2Challenge(token);
+              //       break;
+              //     default:
+              //       self.$store.dispatch('notification/spawnNotification', {
+              //         type: 'error',
+              //         message: i18n.t(
+              //           'Unsupported authentication method: ' + type
+              //         ),
+              //         action1: { label: i18n.t('OK') }
+              //       });
+              //       break;
+              //   }
+              // } else if (result.errorMessage) {
+              //   self.$store.dispatch('notification/spawnNotification', {
+              //     type: 'error',
+              //     message: result.errorMessage,
+              //     action1: { label: i18n.t('OK') }
+              //   });
+              // } else {
+              //   // 3DS Auth not needed, go further...
+              //   self.$emit('payed', {
+              //     method: state.data.paymentMethod.type,
+              //     additional_data: {
+              //       ...state.data.paymentMethod
+              //     },
+              //     browserInfo: {
+              //       ...collectBrowserInfo(),
+              //       language: storeView.i18n.defaultLocale,
+              //       origin: window.location.origin
+              //     }
+              //   });
+              // }
             } catch (err) {
               console.error(err, 'Adyen');
             }
@@ -274,93 +293,93 @@ export default {
         .mount('#adyen-payments-dropin');
     },
 
-    renderThreeDS2DeviceFingerprint(token) {
-      const self = this;
+    // renderThreeDS2DeviceFingerprint(token) {
+    //   const self = this;
 
-      this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
-        'threeDS2DeviceFingerprint',
-        {
-          fingerprintToken: token,
-          async onComplete({ data }) {
-            // It sends request to /adyen/threeDS2Process
-            if (!data && data.details && data.details['threeds2.fingerprint']) {
-              self.$store.dispatch('notification/spawnNotification', {
-                type: 'error',
-                message: i18n.t('Could not verify card data, sorry...'),
-                action1: { label: i18n.t('OK') }
-              });
-              return;
-            }
-            let response = await self.$store.dispatch(
-              'payment-adyen/fingerprint3ds',
-              {
-                fingerprint:
-                  data && data.details && data.details['threeds2.fingerprint']
-              }
-            );
+    //   this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
+    //     'threeDS2DeviceFingerprint',
+    //     {
+    //       fingerprintToken: token,
+    //       async onComplete({ data }) {
+    //         // It sends request to /adyen/threeDS2Process
+    //         if (!data && data.details && data.details['threeds2.fingerprint']) {
+    //           self.$store.dispatch('notification/spawnNotification', {
+    //             type: 'error',
+    //             message: i18n.t('Could not verify card data, sorry...'),
+    //             action1: { label: i18n.t('OK') }
+    //           });
+    //           return;
+    //         }
+    //         let response = await self.$store.dispatch(
+    //           'payment-adyen/fingerprint3ds',
+    //           {
+    //             fingerprint:
+    //               data && data.details && data.details['threeds2.fingerprint']
+    //           }
+    //         );
 
-            if (response.threeDS2) {
-              // ChallengeShopper
-              self.renderThreeDS2Challenge(response.token)
-            } else {
-              self.$emit('payed', self.payloadToSend);
-            }
-          },
-          onError(error) {
-            console.log('Error', error);
-          }
-        }
-      );
-      this.threeDS2IdentifyComponent.mount('#threeDS2Container');
-    },
+    //         if (response.threeDS2) {
+    //           // ChallengeShopper
+    //           self.renderThreeDS2Challenge(response.token)
+    //         } else {
+    //           self.$emit('payed', self.payloadToSend);
+    //         }
+    //       },
+    //       onError(error) {
+    //         console.log('Error', error);
+    //       }
+    //     }
+    //   );
+    //   this.threeDS2IdentifyComponent.mount('#threeDS2Container');
+    // },
 
-    renderThreeDS2Challenge(token) {
-      // Open fullscreen modal
-      this.threedsChallenge = true;
+    // renderThreeDS2Challenge(token) {
+    //   // Open fullscreen modal
+    //   this.threedsChallenge = true;
 
-      // Create Challenge component
-      const self = this
-      this.threeDS2ChallengeComponent = this.adyenCheckoutInstance.create(
-        'threeDS2Challenge',
-        {
-          challengeToken: token,
-          // We have a few sizes, 05 is full 100% width 100% height
-          // Other ones have certain sizes
-          size: '05',
-          async onComplete({ data }) {
-            if (
-              data &&
-              data.details &&
-              data.details['threeds2.challengeResult']
-            ) {
-              let challengeResponse = await self.$store.dispatch(
-                'payment-adyen/fingerprint3ds',
-                {
-                  fingerprint: data.details['threeds2.challengeResult'],
-                  challenge: true,
-                  noPaymentData: true
-                }
-              );
+    //   // Create Challenge component
+    //   const self = this
+    //   this.threeDS2ChallengeComponent = this.adyenCheckoutInstance.create(
+    //     'threeDS2Challenge',
+    //     {
+    //       challengeToken: token,
+    //       // We have a few sizes, 05 is full 100% width 100% height
+    //       // Other ones have certain sizes
+    //       size: '05',
+    //       async onComplete({ data }) {
+    //         if (
+    //           data &&
+    //           data.details &&
+    //           data.details['threeds2.challengeResult']
+    //         ) {
+    //           let challengeResponse = await self.$store.dispatch(
+    //             'payment-adyen/fingerprint3ds',
+    //             {
+    //               fingerprint: data.details['threeds2.challengeResult'],
+    //               challenge: true,
+    //               noPaymentData: true
+    //             }
+    //           );
 
-              self.threedsChallenge = false;
+    //           self.threedsChallenge = false;
 
-              // Finish the hardest way
-              self.$emit('payed', self.payloadToSend);
-            } else {
-              this.$store.dispatch('notification/spawnNotification', {
-                type: 'error',
-                message: i18n.t('Challenge authentication failed'),
-                action1: { label: i18n.t('OK') }
-              });
-            }
-          },
-          onError(error) {
-            console.log('error', error);
-          }
-        }
-      );
-      self.threeDS2ChallengeComponent.mount('#threeDS2Challenge');
-    }
+    //           // Finish the hardest way
+    //           self.$emit('payed', self.payloadToSend);
+    //         } else {
+    //           this.$store.dispatch('notification/spawnNotification', {
+    //             type: 'error',
+    //             message: i18n.t('Challenge authentication failed'),
+    //             action1: { label: i18n.t('OK') }
+    //           });
+    //         }
+    //       },
+    //       onError(error) {
+    //         console.log('error', error);
+    //       }
+    //     }
+    //   );
+    //   self.threeDS2ChallengeComponent.mount('#threeDS2Challenge');
+    // }
   }
 };
 </script>

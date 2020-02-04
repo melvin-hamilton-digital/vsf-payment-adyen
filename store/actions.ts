@@ -46,6 +46,14 @@ export const actions: ActionTree<AdyenState, any> = {
     })
   },
 
+  setCardData({ commit }, cardData) {
+    commit(types.ADD_CARD_DATA, cardData)
+  },
+
+  clearCardData({ commit }) {
+    commit(types.REMOVE_CARD_DATA)
+  },
+
   async loadVault ({ commit, rootGetters }) {
 
     const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
