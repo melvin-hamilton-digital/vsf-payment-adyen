@@ -13,7 +13,7 @@
 import i18n from '@vue-storefront/i18n';
 
 export default {
-  name: '3DSFingerprint',
+  name: 'FinishPayment',
 
   props: {
     callback: {
