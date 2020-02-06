@@ -106,8 +106,33 @@ export default {
         await this.$store.dispatch("payment-adyen/loadPaymentMethods", {})
       }
 
+      const translations = {
+        "en-US": {
+          "payButton": "Pay Now"
+        },
+        "es-ES": {
+          "payButton": "Pagar"
+        },
+        "es-MX": {
+          "payButton": "Pagar"
+        },
+        "fr-FR": {
+          "payButton": "Payer"
+        },
+        "de-DE": {
+          "payButton": "Zahlen"
+        },
+        "it-IT": {
+          "payButton": "Pagar"
+        }
+      };
+
+      const storeView = currentStoreView();
+      let locale = storeView.i18n.defaultLocale
+
       const configuration = {
-        locale: 'en-US',
+        locale,
+        translations,
         environment: 'test',
         originKey: originKeys[origin],
         paymentMethodsResponse: {
@@ -1074,11 +1099,15 @@ export default {
   justify-content: center;
 }
 .adyen-checkout__button__icon {
-  margin-right: 12px;
+  display: none;
+  /* margin-right: 12px; */
 }
 .adyen-checkout__button__text {
+  text-transform: uppercase;
+  letter-spacing: 3px;
   display: block;
   justify-content: center;
+  font-weight: 600;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
