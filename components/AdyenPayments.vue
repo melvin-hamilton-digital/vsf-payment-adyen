@@ -108,22 +108,22 @@ export default {
 
       const translations = {
         "en-US": {
-          "payButton": "Pay Now"
+          "payButton": "Use this Card"
         },
         "es-ES": {
-          "payButton": "Pagar"
+          "payButton": "Use esta tarjeta"
         },
         "es-MX": {
-          "payButton": "Pagar"
+          "payButton": "Use esta tarjeta"
         },
         "fr-FR": {
-          "payButton": "Payer"
+          "payButton": "Utilisez cette carte"
         },
         "de-DE": {
-          "payButton": "Zahlen"
+          "payButton": "Verwenden Sie diese Karte"
         },
         "it-IT": {
-          "payButton": "Pagar"
+          "payButton": "Usa questa carta"
         }
       };
 
