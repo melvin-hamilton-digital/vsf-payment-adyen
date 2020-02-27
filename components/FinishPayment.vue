@@ -120,7 +120,7 @@ export default {
               this.renderThreeDS2Challenge(token);
               break;
             default:
-              self.$store.dispatch('notification/spawnNotification', {
+              this.$store.dispatch('notification/spawnNotification', {
                 type: 'error',
                 message: i18n.t(
                   'Unsupported authentication method: ' + type
@@ -146,6 +146,8 @@ export default {
     },
 
     renderThreeDS2DeviceFingerprint(token) {
+      const self = this
+      
       this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
         'threeDS2DeviceFingerprint',
         {
@@ -153,14 +155,14 @@ export default {
           async onComplete({ data }) {
             // It sends request to /adyen/threeDS2Process
             if (!data && data.details && data.details['threeds2.fingerprint']) {
-              this.$store.dispatch('notification/spawnNotification', {
+              self.$store.dispatch('notification/spawnNotification', {
                 type: 'error',
                 message: i18n.t('Could not verify card data, sorry...'),
                 action1: { label: i18n.t('OK') }
               });
               return;
             }
-            let response = await this.$store.dispatch(
+            let response = await self.$store.dispatch(
               'payment-adyen/fingerprint3ds',
               {
                 fingerprint:
@@ -170,10 +172,16 @@ export default {
 
             if (response.threeDS2) {
               // ChallengeShopper
-              this.renderThreeDS2Challenge(response.token)
+              self.renderThreeDS2Challenge(response.token)
+            } else if (response.errorMessage) {
+              self.$store.dispatch('notification/spawnNotification', {
+                type: 'error',
+                message: response.errorMessage,
+                action1: { label: i18n.t('OK') }
+              });
             } else {
               // self.$emit('payed', self.payloadToSend);
-              this.callback()
+              self.callback()
             }
           },
           onError(error) {
@@ -203,7 +211,7 @@ export default {
               data.details &&
               data.details['threeds2.challengeResult']
             ) {
-              let challengeResponse = await this.$store.dispatch(
+              let challengeResponse = await self.$store.dispatch(
                 'payment-adyen/fingerprint3ds',
                 {
                   fingerprint: data.details['threeds2.challengeResult'],
@@ -212,13 +220,12 @@ export default {
                 }
               );
 
-              this.threedsChallenge = false;
-
+              self.threedsChallenge = false;
               // Finish the hardest way
               // self.$emit('payed', self.payloadToSend);
-              this.callback()
+              self.callback()
             } else {
-              this.$store.dispatch('notification/spawnNotification', {
+              self.$store.dispatch('notification/spawnNotification', {
                 type: 'error',
                 message: i18n.t('Challenge authentication failed'),
                 action1: { label: i18n.t('OK') }
@@ -236,3 +243,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss" scoped>
+  #threeDS2Container {
+    padding: 12px 0;
+  }
+</style>
