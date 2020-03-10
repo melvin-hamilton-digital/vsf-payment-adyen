@@ -6,33 +6,34 @@ import { Logger } from '@vue-storefront/core/lib/logger'
 import fetch from 'isomorphic-fetch'
 import { currentStoreView, adjustMultistoreApiUrl } from '@vue-storefront/core/lib/multistore';
 import { processURLAddress } from '@vue-storefront/core/helpers'
+import { StorageManager } from '@vue-storefront/core/lib/storage-manager'
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<AdyenState, any> = {
   // if you are using cache in your module it's a good practice to allow develoeprs to choose either to use it or not
   saveCardData ({ commit }, { cardData }) {
-    return new Promise ((resolve, reject) => {
-        commit(types.ADD_CARD_DATA, cardData)
-        resolve(cardData)
+    return new Promise((resolve, reject) => {
+      commit(types.ADD_CARD_DATA, cardData)
+      resolve(cardData)
     })
   },
   removeCardData ({ commit }) {
-    return new Promise ( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       commit(types.REMOVE_CARD_DATA)
     })
   },
   adyenValid ({ commit }) {
-    return new Promise ( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       commit(types.VALID)
     })
   },
   adyenInvalid ({ commit }) {
-    return new Promise ( (resolve, reject) => {
+    return new Promise((resolve, reject) => {
       commit(types.INVALID)
     })
   },
   set (context, { code, value, description }) {
-    const adyenCollection = Vue.prototype.$db.adyenCollection
+    const adyenCollection = StorageManager.get('adyenCollection')
     adyenCollection.setItem(code, {
       code: code,
       created_at: new Date(),
@@ -43,16 +44,15 @@ export const actions: ActionTree<AdyenState, any> = {
     })
   },
 
-  setCardData({ commit }, cardData) {
+  setCardData ({ commit }, cardData) {
     commit(types.ADD_CARD_DATA, cardData)
   },
 
-  clearCardData({ commit }) {
+  clearCardData ({ commit }) {
     commit(types.REMOVE_CARD_DATA)
   },
 
   async loadVault ({ commit, rootGetters }) {
-
     const baseUrl = processURLAddress('ext/payment-adyen/')
 
     try {
@@ -98,7 +98,7 @@ export const actions: ActionTree<AdyenState, any> = {
       })
       let { result } = await response.json()
       console.log(result)
-      commit(types.SET_PAYMENT_METHODS, result ? result : [])
+      commit(types.SET_PAYMENT_METHODS, result || [])
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
@@ -155,7 +155,6 @@ export const actions: ActionTree<AdyenState, any> = {
       let { result } = await response.json()
 
       return result
-
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
@@ -196,7 +195,6 @@ export const actions: ActionTree<AdyenState, any> = {
       let { result } = await response.json()
 
       return result
-      
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
