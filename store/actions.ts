@@ -1,14 +1,11 @@
 import { AdyenState } from '../types/AdyenState';
-import rootStore from '@vue-storefront/core/store'
 import { ActionTree } from 'vuex';
 import * as types from './mutation-types';
 import Vue from 'vue';
-// import axios from 'axios'
 import { Logger } from '@vue-storefront/core/lib/logger'
 import fetch from 'isomorphic-fetch'
-import config from 'config'
 import { currentStoreView, adjustMultistoreApiUrl } from '@vue-storefront/core/lib/multistore';
-import SideRequest from '@vue-storefront/core/lib/side-request';
+import { processURLAddress } from '@vue-storefront/core/helpers'
 
 // it's a good practice for all actions to return Promises with effect of their execution
 export const actions: ActionTree<AdyenState, any> = {
@@ -56,14 +53,14 @@ export const actions: ActionTree<AdyenState, any> = {
 
   async loadVault ({ commit, rootGetters }) {
 
-    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+    const baseUrl = processURLAddress('ext/payment-adyen/')
 
     try {
       let token = ''
       if (rootGetters['user/getUserToken']) {
         token = `?token=${rootGetters['user/getUserToken']}`
       }
-      
+
       let response = await fetch(adjustMultistoreApiUrl(`${baseUrl}vault${token}`), {
         method: 'POST'
       })
@@ -82,7 +79,7 @@ export const actions: ActionTree<AdyenState, any> = {
       return
     }
 
-    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+    const baseUrl = processURLAddress('/ext/payment-adyen/')
 
     try {
       const { storeCode } = currentStoreView()
@@ -90,7 +87,7 @@ export const actions: ActionTree<AdyenState, any> = {
       if (rootGetters['user/getUserToken']) {
         token = `?token=${rootGetters['user/getUserToken']}`
       }
-      
+
       let response = await fetch(`${baseUrl}methods/${storeCode}/${cartId}${token}`, {
         method: 'POST',
         body: JSON.stringify({
@@ -123,7 +120,7 @@ export const actions: ActionTree<AdyenState, any> = {
     //   customer_id = rootState.user.current.id
     // }
 
-    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+    const baseUrl = processURLAddress('ext/payment-adyen/')
 
     try {
       const { storeCode } = currentStoreView()
@@ -158,7 +155,7 @@ export const actions: ActionTree<AdyenState, any> = {
       let { result } = await response.json()
 
       return result
-      
+
     } catch (err) {
       console.error('[Adyen Payments]', err)
     }
@@ -180,7 +177,7 @@ export const actions: ActionTree<AdyenState, any> = {
     //   customer_id = rootState.user.current.id
     // }
 
-    const baseUrl = `${SideRequest(config.api, 'url')}ext/payment-adyen/`
+    const baseUrl = processURLAddress('ext/payment-adyen/')
 
     try {
       const { storeCode } = currentStoreView()
