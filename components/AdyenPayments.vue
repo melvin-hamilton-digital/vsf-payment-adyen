@@ -1,6 +1,6 @@
 <template>
   <div class="adyen-block">
-    <div id="adyen-payments-dropin"></div>
+    <div id="adyen-payments-dropin" />
     <!-- <div id="threeDS2Container"></div>
     <transition name="fade">
       <div class="threeds-challenge" v-show="threedsChallenge">
@@ -25,7 +25,7 @@ import i18n from '@vue-storefront/i18n';
 export default {
   name: 'AdyenPayments',
 
-  data() {
+  data () {
     return {
       payment: this.$store.state.checkout.paymentDetails,
       tst: this.$store.getters['payment-adyen/methods'],
@@ -36,19 +36,19 @@ export default {
       dropin: null,
       threedsChallenge: false,
       cardMaps: {
-        "amex":"AE",
-        "discover":"DI",
-        "jcb":"JCB",
-        "mc":"MC",
-        "visa":"VI",
-        "maestro":"MI",
-        "diners":"DN",
-        "unionpay":"CUP"
+        'amex': 'AE',
+        'discover': 'DI',
+        'jcb': 'JCB',
+        'mc': 'MC',
+        'visa': 'VI',
+        'maestro': 'MI',
+        'diners': 'DN',
+        'unionpay': 'CUP'
       }
     };
   },
 
-  async mounted() {
+  async mounted () {
     if (!document.getElementById('adyen-secured-fields')) {
       if (typeof window !== 'undefined') {
         try {
@@ -69,7 +69,7 @@ export default {
     /**
      * @description - Dynamicly fetches AdyenCheckout class
      */
-    loadScript(src) {
+    loadScript (src) {
       return new Promise((resolve, reject) => {
         let script = document.createElement('script');
         script.setAttribute('id', 'adyen-secured-fields');
@@ -80,7 +80,7 @@ export default {
       });
     },
 
-    async createForm() {
+    async createForm () {
       if (
         this.payment &&
         this.payment.paymentMethodAdditional &&
@@ -96,34 +96,34 @@ export default {
       }
 
       const storedPaymentMethods = this.$store.getters['payment-adyen/cards']
-      
+
       if (this.$store.getters['user/isLoggedIn']) {
         await Promise.all([
-          this.$store.dispatch("payment-adyen/loadVault"),
-          this.$store.dispatch("payment-adyen/loadPaymentMethods", {})
+          this.$store.dispatch('payment-adyen/loadVault'),
+          this.$store.dispatch('payment-adyen/loadPaymentMethods', {})
         ]);
       } else {
-        await this.$store.dispatch("payment-adyen/loadPaymentMethods", {})
+        await this.$store.dispatch('payment-adyen/loadPaymentMethods', {})
       }
 
       const translations = {
-        "en-US": {
-          "payButton": "Pay Now"
+        'en-US': {
+          'payButton': 'Pay Now'
         },
-        "es-ES": {
-          "payButton": "Pagar"
+        'es-ES': {
+          'payButton': 'Pagar'
         },
-        "es-MX": {
-          "payButton": "Pagar"
+        'es-MX': {
+          'payButton': 'Pagar'
         },
-        "fr-FR": {
-          "payButton": "Payer"
+        'fr-FR': {
+          'payButton': 'Payer'
         },
-        "de-DE": {
-          "payButton": "Zahlen"
+        'de-DE': {
+          'payButton': 'Zahlen'
         },
-        "it-IT": {
-          "payButton": "Pagar"
+        'it-IT': {
+          'payButton': 'Pagar'
         }
       };
 
@@ -143,8 +143,8 @@ export default {
           ),
           ...(
             this.$store.getters['user/isLoggedIn'] && this.$store.getters['payment-adyen/cards'] && !!this.$store.getters['payment-adyen/cards'].length
-            ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
-            : {}
+              ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
+              : {}
           )
         }
       };
@@ -177,7 +177,7 @@ export default {
               showStoredPaymentMethods: loggedIn,
               name: 'Credit or debit card',
               brands: Object.keys(self.cardMaps)
-            },
+            }
             // paypal: {
             //   enableStoreDetails: true,
             //   name: 'PayPal'
@@ -193,7 +193,7 @@ export default {
               const storeView = currentStoreView();
 
               // Saved card needs only that
-              if (!!state.data.paymentMethod.storedPaymentMethodId) {
+              if (state.data.paymentMethod.storedPaymentMethodId) {
                 const cards = self.$store.getters['payment-adyen/cards']
                 const card = cards.find(card => card.id === state.data.paymentMethod.storedPaymentMethodId)
                 if (card) {
@@ -316,7 +316,7 @@ export default {
           }
         })
         .mount('#adyen-payments-dropin');
-    },
+    }
 
     // renderThreeDS2DeviceFingerprint(token) {
     //   const self = this;

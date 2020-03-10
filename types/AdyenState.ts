@@ -1,30 +1,30 @@
 interface PaymentDetail {
-    key: string,
-    type: string,
-    optional?: Boolean
+  key: string,
+  type: string,
+  optional?: boolean
 }
 
 interface PaymentIcon {
-    url: string,
-    width: Number,
-    height: Number
+  url: string,
+  width: number,
+  height: number
 }
 
 interface PaymentMethod {
-    type: string,
-    title: string,
-    isPaymentMethodOpenInvoiceMethod: Boolean,
-    icon: PaymentIcon | null,
-    supportRecurring?: Boolean,
-    details?: Array<PaymentDetail>,
-    brands?: Array<string>
+  type: string,
+  title: string,
+  isPaymentMethodOpenInvoiceMethod: boolean,
+  icon: PaymentIcon | null,
+  supportRecurring?: boolean,
+  details?: PaymentDetail[],
+  brands?: string[]
 }
 
 export interface AdyenState {
-    isAdyenValid: boolean | null,
-    adyenCard: any | null,
-    paymentMethods: Array<PaymentMethod>,
-    saveCard: Boolean,
-    loadedCards: Array<any>,
-    publicHash: string | null
+  isAdyenValid: boolean | null,
+  adyenCard: any | null,
+  paymentMethods: PaymentMethod[],
+  saveCard: boolean,
+  loadedCards: any[],
+  publicHash: string | null
 }

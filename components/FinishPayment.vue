@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div id="threeDS2Container"></div>
+    <div id="threeDS2Container" />
     <transition name="fade">
       <div class="threeds-challenge" v-show="threedsChallenge">
-        <div id="threeDS2Challenge"></div>
+        <div id="threeDS2Challenge" />
       </div>
     </transition>
   </div>
@@ -37,7 +37,7 @@ export default {
     }
   },
 
-  async mounted() {
+  async mounted () {
     if (!document.getElementById('adyen-secured-fields')) {
       if (typeof window !== 'undefined') {
         try {
@@ -46,7 +46,6 @@ export default {
           );
 
           this.createForm()
-
         } catch (err) {
           console.info(err, "Couldnt fetch adyen's library");
         }
@@ -60,7 +59,7 @@ export default {
     /**
      * @description - Dynamicly fetches AdyenCheckout class
      */
-    loadScript(src) {
+    loadScript (src) {
       return new Promise((resolve, reject) => {
         let script = document.createElement('script');
         script.setAttribute('id', 'adyen-secured-fields');
@@ -73,32 +72,32 @@ export default {
 
     createForm () {
       const originKeys = this.$store.state.config.adyen.originKeys;
-          const origin = window.location.origin;
-          if (!originKeys[origin]) {
-            console.error('[Adyen] Set origin key in the config!');
-          }
+      const origin = window.location.origin;
+      if (!originKeys[origin]) {
+        console.error('[Adyen] Set origin key in the config!');
+      }
 
-          const configuration = {
-            locale: 'en-US',
-            environment: 'test',
-            originKey: originKeys[origin],
-            paymentMethodsResponse: {
-              // There I am setting payment methods
-              // For now only scheme === adyen_cc
-              paymentMethods: this.$store.getters['payment-adyen/methods'].filter(
-                method => method.type === 'scheme'
-              ),
-              ...(
-                this.$store.getters['user/isLoggedIn']
-                && this.$store.getters['payment-adyen/cards']
-                && !!this.$store.getters['payment-adyen/cards'].length
-                ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
-                : {}
-              )
-            }
-          };
-          this.adyenCheckoutInstance = new AdyenCheckout(configuration);
-          this.initPayment()
+      const configuration = {
+        locale: 'en-US',
+        environment: 'test',
+        originKey: originKeys[origin],
+        paymentMethodsResponse: {
+          // There I am setting payment methods
+          // For now only scheme === adyen_cc
+          paymentMethods: this.$store.getters['payment-adyen/methods'].filter(
+            method => method.type === 'scheme'
+          ),
+          ...(
+            this.$store.getters['user/isLoggedIn'] &&
+                this.$store.getters['payment-adyen/cards'] &&
+                !!this.$store.getters['payment-adyen/cards'].length
+              ? { storedPaymentMethods: this.$store.getters['payment-adyen/cards'] }
+              : {}
+          )
+        }
+      };
+      this.adyenCheckoutInstance = new AdyenCheckout(configuration);
+      this.initPayment()
     },
 
     async initPayment () {
@@ -145,14 +144,14 @@ export default {
       }
     },
 
-    renderThreeDS2DeviceFingerprint(token) {
+    renderThreeDS2DeviceFingerprint (token) {
       const self = this
-      
+
       this.threeDS2IdentifyComponent = this.adyenCheckoutInstance.create(
         'threeDS2DeviceFingerprint',
         {
           fingerprintToken: token,
-          async onComplete({ data }) {
+          async onComplete ({ data }) {
             // It sends request to /adyen/threeDS2Process
             if (!data && data.details && data.details['threeds2.fingerprint']) {
               self.$store.dispatch('notification/spawnNotification', {
@@ -184,7 +183,7 @@ export default {
               self.callback()
             }
           },
-          onError(error) {
+          onError (error) {
             console.log('Error', error);
           }
         }
@@ -192,7 +191,7 @@ export default {
       this.threeDS2IdentifyComponent.mount('#threeDS2Container');
     },
 
-    renderThreeDS2Challenge(token) {
+    renderThreeDS2Challenge (token) {
       // Open fullscreen modal
       this.threedsChallenge = true;
 
@@ -205,7 +204,7 @@ export default {
           // We have a few sizes, 05 is full 100% width 100% height
           // Other ones have certain sizes
           size: '05',
-          async onComplete({ data }) {
+          async onComplete ({ data }) {
             if (
               data &&
               data.details &&
@@ -232,7 +231,7 @@ export default {
               });
             }
           },
-          onError(error) {
+          onError (error) {
             console.log('error', error);
           }
         }

@@ -10,39 +10,38 @@
  * @returns {Object} - browserInfo an object containing the retrieved browser properties
  */
 const collectBrowserInfo = () => {
+  const screenWidth = window && window.screen ? window.screen.width : '';
+  const screenHeight = window && window.screen ? window.screen.height : '';
+  const colorDepth = window && window.screen ? window.screen.colorDepth : '';
+  const userAgent = window && window.navigator ? window.navigator.userAgent : '';
+  const javaEnabled = window && window.navigator ? navigator.javaEnabled() : false;
 
-    const screenWidth = window && window.screen ? window.screen.width : '';
-    const screenHeight = window && window.screen ? window.screen.height : '';
-    const colorDepth = window && window.screen ? window.screen.colorDepth : '';
-    const userAgent = window && window.navigator ? window.navigator.userAgent : '';
-    const javaEnabled = window && window.navigator ? navigator.javaEnabled() : false;
+  let language = '';
+  if (window && window.navigator) {
+    language = window.navigator.language
+      ? window.navigator.language
+      : window.navigator.browserLanguage; // Else is for IE <+ 10
+  }
 
-    let language = '';
-    if (window && window.navigator) {
-        language = window.navigator.language
-            ? window.navigator.language
-            : window.navigator.browserLanguage; // Else is for IE <+ 10
-    }
+  const d = new Date();
+  const timeZoneOffset = d.getTimezoneOffset();
 
-    const d = new Date();
-    const timeZoneOffset = d.getTimezoneOffset();
+  const browserInfo = {
+    // screenWidth,
+    screen_width: screenWidth,
+    // screenHeight,
+    screen_height: screenHeight,
+    // colorDepth,
+    screen_color_depth: colorDepth,
+    userAgent,
+    // timeZoneOffset,
+    timezone_offset: timeZoneOffset,
+    language,
+    // javaEnabled,
+    java_enabled: javaEnabled
+  };
 
-    const browserInfo = {
-        // screenWidth,
-        screen_width: screenWidth,
-        // screenHeight,
-        screen_height: screenHeight,
-        // colorDepth,
-        screen_color_depth: colorDepth,
-        userAgent,
-        // timeZoneOffset,
-        timezone_offset: timeZoneOffset,
-        language,
-        // javaEnabled,
-        java_enabled: javaEnabled,
-    };
-
-    return browserInfo;
+  return browserInfo;
 };
 
 export default collectBrowserInfo;

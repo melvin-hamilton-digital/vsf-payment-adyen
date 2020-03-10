@@ -6,9 +6,9 @@ import { actions } from './actions'
 import { state } from './state'
 
 export const module: Module<AdyenState, any> = {
-    namespaced: true,
-    state,
-    mutations,
-    actions,
-    getters
+  namespaced: true,
+  state,
+  mutations,
+  actions,
+  getters
 }

@@ -33,14 +33,14 @@ export const mutations: MutationTree<any> = {
         expiryYear: expiryYear,
         id: card.gateway_token,
         lastFour: maskedCC,
-        name: "VISA",
+        name: 'VISA',
         supportedShopperInteractions: [
-          "Ecommerce",
-          "ContAuth"
+          'Ecommerce',
+          'ContAuth'
         ],
         holderName: 'You',
         public_hash: card.public_hash,
-        type: "scheme"
+        type: 'scheme'
       }
     })
   },

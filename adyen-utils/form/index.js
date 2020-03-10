@@ -12,26 +12,25 @@
  * @returns {Element} - Created form element
  */
 const createForm = (name, action, target, inputName, inputValue) => {
+  if (!name || !action || !target || !inputName || !inputValue) {
+    throw new Error('Not all required parameters provided for form creation');
+  }
 
-    if (!name || !action || !target || !inputName || !inputValue) {
-        throw new Error('Not all required parameters provided for form creation');
-    }
+  if (name.length === 0 || action.length === 0 || target.length === 0 || inputName.length === 0 || inputValue.length === 0) {
+    throw new Error('Not all required parameters have suitable values');
+  }
 
-    if (name.length === 0 || action.length === 0 || target.length === 0 || inputName.length === 0 || inputValue.length === 0) {
-        throw new Error('Not all required parameters have suitable values');
-    }
-
-    const form = document.createElement( 'form' );
-    form.style.display = 'none';
-    form.name = name;
-    form.action = action;
-    form.method = "POST";
-    form.target = target;
-    const input = document.createElement( 'input' );
-    input.name = inputName;
-    input.value = inputValue;
-    form.appendChild( input );
-    return form;
+  const form = document.createElement('form');
+  form.style.display = 'none';
+  form.name = name;
+  form.action = action;
+  form.method = 'POST';
+  form.target = target;
+  const input = document.createElement('input');
+  input.name = inputName;
+  input.value = inputValue;
+  form.appendChild(input);
+  return form;
 };
 
 export default createForm;

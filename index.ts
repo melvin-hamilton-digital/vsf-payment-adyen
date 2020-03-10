@@ -6,10 +6,10 @@ import { beforeRegistration } from './hooks/beforeRegistration'
 export const KEY = 'payment-adyen'
 
 const moduleConfig: VueStorefrontModuleConfig = {
-    key: KEY,
-    store: { modules: [{ key: KEY, module }] },
-    beforeRegistration,
-    afterRegistration
+  key: KEY,
+  store: { modules: [{ key: KEY, module }] },
+  beforeRegistration,
+  afterRegistration
 }
 
 export const PaymentAdyen = createModule(moduleConfig)

@@ -21,7 +21,7 @@
       <div class="container">
         <div class="row">
           <div class="col-md-6 pl20 pr20">
-            <h3 v-if="OnlineOnly" >
+            <h3 v-if="OnlineOnly">
               {{ $t('Thank you!') }}
             </h3>
           </div>
