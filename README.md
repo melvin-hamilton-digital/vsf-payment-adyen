@@ -52,11 +52,11 @@ In `./src/modules/index.ts`
 
 ```js
 ...
-import { Adyen } from './adyen'
+import { PaymentAdyen } from './adyen'
 
 export const registerModules: VueStorefrontModule[] = [
   ...,
-  Adyen
+  PaymentAdyen
 ]
 ```
 
