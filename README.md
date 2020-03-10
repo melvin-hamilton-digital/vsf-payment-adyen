@@ -64,14 +64,12 @@ export const registerModules: VueStorefrontModule[] = [
 Under your theme `components/core/blocks/Checkout/Payment.vue`.
 
 ```js
-import CardForm from 'src/modules/adyen/components/CardForm'
-import PayPal from 'src/modules/adyen/components/PayPal'
+import AdyenPayments from 'src/modules/adyen/components/AdyenPayments'
 
 export default {
   components: {
-    ...
-    CardForm,
-    PayPal
+    ...,
+    AdyenPayments
   },
   ...
   computed: {
@@ -85,8 +83,7 @@ export default {
 Also add form component to your template:
 
 ```html
-<card-form v-if="payment.paymentMethod === 'adyenCreditCard'"/>
-<pay-pal v-else-if="payment.paymentMethod === 'adyenPayPal'"/>
+<AdyenPayments v-if="['adyenCreditCard'].includes(payment.paymentMethod)"/>
 ```
 and !isAdyenValid to "Go review the order" button, for disabling it until all card data was validate.
 ```html
